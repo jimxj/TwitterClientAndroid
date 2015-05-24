@@ -3,25 +3,19 @@
  */
 package com.jim.apps.twitter.adapter;
 
-import android.app.Activity;
-import android.app.FragmentManager;
 import android.content.Context;
 import android.net.Uri;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
+import com.jim.apps.twitter.R;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.jim.apps.twitter.Utils;
 import com.jim.apps.twitter.models.Tweet;
-import com.codepath.apps.twitter.R;
 
-import java.util.ArrayList;
 import java.util.List;
 
 

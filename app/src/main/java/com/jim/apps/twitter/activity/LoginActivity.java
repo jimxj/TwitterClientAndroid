@@ -7,7 +7,7 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.Toast;
 
-import com.codepath.apps.twitter.R;
+import com.jim.apps.twitter.R;
 import com.jim.apps.twitter.api.TwitterClient;
 import com.codepath.oauth.OAuthLoginActionBarActivity;
 

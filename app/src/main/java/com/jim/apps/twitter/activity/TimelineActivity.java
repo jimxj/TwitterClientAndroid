@@ -1,14 +1,17 @@
 package com.jim.apps.twitter.activity;
 
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.ListView;
 
-import com.codepath.apps.twitter.R;
+import com.jim.apps.twitter.R;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.jim.apps.twitter.TwitterApplication;
 import com.jim.apps.twitter.adapter.TweetAdapter;
@@ -38,6 +41,9 @@ public class TimelineActivity extends ActionBarActivity {
   @InjectView(R.id.swipeContainer)
   SwipeRefreshLayout swipeContainer;
 
+  @InjectView(R.id.tbMain)
+  Toolbar toolbar;
+
   TwitterClient twitterClient;
 
   Long sinceId = 1l;
@@ -51,12 +57,14 @@ public class TimelineActivity extends ActionBarActivity {
     ButterKnife.inject(this);
     Fresco.initialize(this);
 
+    setupActionBar();
+
     twitterClient = TwitterApplication.getTwitterClient();
 
     tweetListAdapter = new TweetAdapter(this, new ArrayList<Tweet>());
     lvTimeline.setAdapter(tweetListAdapter);
 
-    fetchTweets(true);
+    //fetchTweets(true);
 
     // Setup refresh listener which triggers new data loading
     swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -148,5 +156,26 @@ public class TimelineActivity extends ActionBarActivity {
     }
 
     return super.onOptionsItemSelected(item);
+  }
+
+  private void setupActionBar() {
+    //setSupportActionBar(toolbar);
+    //toolbar.setLogo(R.drawable.ic_launcher);
+    toolbar.setNavigationIcon(R.drawable.twitter_bird);
+//    ActionBar actionBar = getSupportActionBar();
+    //getSupportActionBar().setHomeButtonEnabled(true);
+    //getSupportActionBar().setDisplayShowHomeEnabled(true);
+    //getSupportActionBar().setDisplayUseLogoEnabled(true);
+    //getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+    //    actionBar.setLogo(R.drawable.ic_launcher);
+//    actionBar.setDisplayUseLogoEnabled(true);
+////    actionBar.setTitle(null);
+
+//    toolbar.setNavigationIcon(R.drawable.ic_launcher);
+    //toolbar.setTitle("Title");
+    //toolbar.setSubtitle("Sub");
+
+    //toolbar.setLogo(R.drawable.ic_launcher);
   }
 }
