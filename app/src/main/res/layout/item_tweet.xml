@@ -89,7 +89,10 @@
             android:text="Medium Text"
             android:id="@+id/tvText"
             android:textColor="@color/black"
-            android:layout_below="@+id/tvUserName"/>
+            android:layout_below="@+id/tvUserName"
+            android:autoLink="all"
+            android:linksClickable="true"
+            />
 
 
 

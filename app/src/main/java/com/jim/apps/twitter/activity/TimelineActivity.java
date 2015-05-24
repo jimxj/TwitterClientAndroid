@@ -1,5 +1,6 @@
 package com.jim.apps.twitter.activity;
 
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,6 +15,7 @@ import com.jim.apps.twitter.adapter.TweetAdapter;
 import com.jim.apps.twitter.api.ApiCallback;
 import com.jim.apps.twitter.api.TwitterClient;
 import com.jim.apps.twitter.models.Tweet;
+import com.jim.apps.twitter.util.EndlessScrollListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,6 +35,9 @@ public class TimelineActivity extends ActionBarActivity {
   @InjectView(R.id.lvTimeline)
   ListView lvTimeline;
 
+  @InjectView(R.id.swipeContainer)
+  SwipeRefreshLayout swipeContainer;
+
   TwitterClient twitterClient;
 
   Long sinceId = 1l;
@@ -51,27 +56,74 @@ public class TimelineActivity extends ActionBarActivity {
     tweetListAdapter = new TweetAdapter(this, new ArrayList<Tweet>());
     lvTimeline.setAdapter(tweetListAdapter);
 
-    fetchTweets();
+    fetchTweets(true);
+
+    // Setup refresh listener which triggers new data loading
+    swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+      @Override
+      public void onRefresh() {
+        // Your code to refresh the list here.
+        // Make sure you call swipeContainer.setRefreshing(false)
+        // once the network request has completed successfully.
+        fetchTweets(true);
+      }
+    });
+    // Configure the refreshing colors
+    swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
+            android.R.color.holo_green_light,
+            android.R.color.holo_orange_light,
+            android.R.color.holo_red_light);
+
+    lvTimeline.setOnScrollListener(new EndlessScrollListener() {
+
+      @Override
+      public void onLoadMore(int page, int totalItemsCount) {
+        //Log.i(TAG, "page : " + page + ", totalItemsCount : " + totalItemsCount + ", current page : " + GoogleImageSearch.getInstance().getCurrentPage());
+        fetchTweets(false);
+      }
+    });
   }
 
-  private void fetchTweets() {
-    twitterClient.getHomeTimeline(sinceId, maxId, null, new ApiCallback<List<Tweet>>() {
+  private void fetchTweets(final boolean isLoadingLatest) {
+    Log.d(TAG, "--------------fetchTweets, isLoadingLatest = " + isLoadingLatest + ", sinceId = " + sinceId + ", maxId = " + maxId);
+    twitterClient.getHomeTimeline(isLoadingLatest ? sinceId : null,
+            !isLoadingLatest ? maxId : null, null, new ApiCallback<List<Tweet>>() {
       @Override
       public void success(List<Tweet> tweets) {
-        Log.e(TAG, "fetch tweets : " + tweets);
-        if(1 == sinceId) {
+        Log.d(TAG, "fetched " + tweets.size() + " new tweets : " + tweets);
+        if(0 == tweets.size()) {
+          swipeContainer.setRefreshing(false);
+          return;
+        }
+
+        if(isLoadingLatest) {
+          if (1 == sinceId) {
+            tweetListAdapter.addAll(tweets);
+            if(null == maxId) {
+              maxId = tweets.get(tweets.size() - 1).getId();
+            }
+          } else {
+            for (int i = tweets.size() - 1; i >= 0; i--) {
+              tweetListAdapter.insert(tweets.get(i), 0);
+            }
+          }
+
+          sinceId = tweets.get(0).getId();
+        } else {
           tweetListAdapter.addAll(tweets);
-
+          maxId = tweets.get(tweets.size() - 1).getId();
         }
 
-        if(null != tweets && tweets.size() > 0) {
-          tweetListAdapter.notifyDataSetChanged();
-        }
+        tweetListAdapter.notifyDataSetChanged();
+
+        swipeContainer.setRefreshing(false);
       }
 
       @Override
       public void failure(String error) {
         Log.e(TAG, "Failed to fetch tweets : " + error);
+
+        swipeContainer.setRefreshing(false);
       }
     });
   }
