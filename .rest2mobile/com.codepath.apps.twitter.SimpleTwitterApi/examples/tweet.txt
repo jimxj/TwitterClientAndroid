@@ -1,0 +1,10 @@
++Name tweet
+
++Request
+POST https://api.twitter.com/1.1/statuses/update.json?status=hello
++Headers
++Body
+
++Response
++Body
+

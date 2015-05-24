@@ -1,0 +1,10 @@
++Name retweetsOfMe
+
++Request
+GET https://api.twitter.com/1.1/statuses/retweets_of_me.json
++Headers
++Body
+
++Response
++Body
+
