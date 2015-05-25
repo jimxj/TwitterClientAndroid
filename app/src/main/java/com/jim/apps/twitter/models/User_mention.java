@@ -22,7 +22,7 @@ import java.util.List;
 public class User_mention {
 
   
-  private Integer id;
+  private Long id;
 
   
   private String id_str;
@@ -36,7 +36,7 @@ public class User_mention {
   
   private String screen_name;
 
-  public Integer getId() {
+  public Long getId() {
     return id;
   }
   public String getId_str() {
@@ -65,7 +65,7 @@ public class User_mention {
       return toBuild;
     }
 
-    public User_mentionBuilder id(Integer value) {
+    public User_mentionBuilder id(Long value) {
       toBuild.id = value;
       return this;
     }

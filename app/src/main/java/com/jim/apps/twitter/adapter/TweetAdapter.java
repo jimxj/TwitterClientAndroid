@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.jim.apps.twitter.R;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.jim.apps.twitter.Utils;
+import com.jim.apps.twitter.models.Media;
 import com.jim.apps.twitter.models.Tweet;
 
 import java.util.List;
@@ -31,7 +32,7 @@ public class TweetAdapter extends ArrayAdapter<Tweet> {
       TextView text;
       TextView retweetNum;
       TextView favorateNum;
-      //SimpleDraweeView postImage;
+      SimpleDraweeView postImage;
       //TextView likes;
       //TextView commentNum;
     }
@@ -55,6 +56,7 @@ public class TweetAdapter extends ArrayAdapter<Tweet> {
         viewHolder.text = (TextView) convertView.findViewById(R.id.tvText);
         viewHolder.retweetNum = (TextView) convertView.findViewById(R.id.tvRetweetNum);
         viewHolder.favorateNum = (TextView) convertView.findViewById(R.id.tvFavorateNum);
+        viewHolder.postImage = (SimpleDraweeView) convertView.findViewById(R.id.ivPhoto);
         //viewHolder.postImage = (SimpleDraweeView) convertView.findViewById(R.id.ivPhoto);
         //viewHolder.likes = (TextView) convertView.findViewById(R.id.tvLikeNum);
         //viewHolder.commentNum = (TextView) convertView.findViewById(R.id.tvViewAllComments);
@@ -73,6 +75,28 @@ public class TweetAdapter extends ArrayAdapter<Tweet> {
       viewHolder.text.setText(tweet.getText());
       viewHolder.retweetNum.setText(String.valueOf(tweet.getRetweet_count()));
       viewHolder.favorateNum.setText(String.valueOf(tweet.getFavorite_count()));
+
+      String mediaUrl = null;
+      if(null != tweet.getEntities() && null != tweet.getEntities().getMedia() && tweet.getEntities().getMedia().size() > 0) {
+        Media media = tweet.getEntities().getMedia().get(0);
+        mediaUrl = media.getMedia_url();
+      }
+      if(null != mediaUrl) {
+        viewHolder.postImage.setImageURI(Uri.parse(mediaUrl));
+        viewHolder.postImage.setVisibility(View.VISIBLE);
+
+        android.view.ViewGroup.LayoutParams layoutParams = viewHolder.postImage.getLayoutParams();
+        //layoutParams.width = 80;
+        layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        viewHolder.postImage.setLayoutParams(layoutParams);
+      } else {
+        viewHolder.postImage.setVisibility(View.INVISIBLE);
+
+        android.view.ViewGroup.LayoutParams layoutParams = viewHolder.postImage.getLayoutParams();
+        //layoutParams.width = 80;
+        layoutParams.height = 0;
+        viewHolder.postImage.setLayoutParams(layoutParams);
+      }
       //viewHolder.likes.setText(Utils.formatInt(photo.getLikes().getCount()) + " likes");
 
       //viewHolder.commentNum.setText("View all " + Utils.formatInt(photo.getComments().getCount()) + " comments");

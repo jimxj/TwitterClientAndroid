@@ -46,7 +46,7 @@ public class Tweet {
   private String created_at;
 
   
-  //private Entities entities;
+  private Entities entities;
 
   
   private Boolean favorited;
@@ -98,9 +98,9 @@ public class Tweet {
   public String getCreated_at() {
     return created_at;
   }
-//  public Entities getEntities() {
-//    return entities;
-//  }
+  public Entities getEntities() {
+    return entities;
+  }
   public Boolean getFavorited() {
     return favorited;
   }

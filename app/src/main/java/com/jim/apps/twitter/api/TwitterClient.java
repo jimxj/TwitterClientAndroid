@@ -70,6 +70,7 @@ public class TwitterClient extends OAuthBaseClient {
     if (null != maxId) {
       params.put("max_id", maxId  );
     }
+    params.put("include_entities", true);
     getClient().get(apiUrl, params, new AsyncHttpResponseHandler() {
       @Override
       public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {

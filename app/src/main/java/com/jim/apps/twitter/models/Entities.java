@@ -20,17 +20,24 @@ import java.util.List;
 public class Entities {
 
   
-  private List<java.lang.String> hashtags;
+  //private List<java.lang.String> hashtags;
 
   
   private List<Url> urls;
 
+  private List<Media> media;
+
   
   private List<User_mention> user_mentions;
 
-  public List<java.lang.String> getHashtags() {
-    return hashtags;
+//  public List<java.lang.String> getHashtags() {
+//    return hashtags;
+//  }
+
+  public List<Media> getMedia() {
+    return media;
   }
+
   public List<Url> getUrls() {
     return urls;
   }
@@ -51,10 +58,10 @@ public class Entities {
       return toBuild;
     }
 
-    public EntitiesBuilder hashtags(List<java.lang.String> value) {
-      toBuild.hashtags = value;
-      return this;
-    }
+//    public EntitiesBuilder hashtags(List<java.lang.String> value) {
+//      toBuild.hashtags = value;
+//      return this;
+//    }
     public EntitiesBuilder urls(List<Url> value) {
       toBuild.urls = value;
       return this;
