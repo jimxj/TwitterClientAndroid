@@ -22,12 +22,14 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 import fr.tvbarthel.lib.blurdialogfragment.BlurDialogEngine;
 
 public class ComposeDialogFragment extends DialogFragment {
-  public interface OnNewTweetListener {
-    void onNewTweet(String text);
-  }
+
+  private static final String KEY_IN_REPLY_ID = "inReplyId";
+  private static final String KEY_IN_REPLY_NAME = "inReplySreenName";
 
   private static final int MAX_LENGTH = 140;
 
@@ -35,8 +37,18 @@ public class ComposeDialogFragment extends DialogFragment {
 
   private OnNewTweetListener newTweetListener;
 
-  public static ComposeDialogFragment newInstance() {
+  private Long inReplyId;
+  private String inReplySreenName;
+
+  public static ComposeDialogFragment newInstance(Long inReplyId, String inReplySreenName) {
     ComposeDialogFragment fragment = new ComposeDialogFragment();
+
+    if(null != inReplyId) {
+      Bundle args = new Bundle();
+      args.putLong(KEY_IN_REPLY_ID, inReplyId);
+      args.putString(KEY_IN_REPLY_NAME, inReplySreenName);
+      fragment.setArguments(args);
+    }
 
     return fragment;
   }
@@ -89,11 +101,20 @@ public class ComposeDialogFragment extends DialogFragment {
     View view = inflater.inflate(R.layout.fragment_compose, container);
     final EditText etText = (EditText) view.findViewById(R.id.edText);
 
+    inReplyId = getArguments().getLong(KEY_IN_REPLY_ID);
+    if(null != inReplyId) {
+      etText.setText("@" + getArguments().getString(KEY_IN_REPLY_NAME));
+    }
+
     Button btnTweet = (Button) view.findViewById(R.id.btnTweet);
     btnTweet.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        newTweetListener.onNewTweet(etText.getText().toString());
+        if(null == inReplyId) {
+          newTweetListener.onNewTweet(etText.getText().toString());
+        } else {
+          newTweetListener.onReplyTweet(inReplyId, etText.getText().toString());
+        }
         dismiss();
       }
     });

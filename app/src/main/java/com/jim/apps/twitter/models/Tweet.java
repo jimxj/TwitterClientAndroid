@@ -80,6 +80,7 @@ public class Tweet {
   
   private Boolean retweeted;
 
+  private Tweet retweeted_status;
   
   private String source;
 
@@ -159,90 +160,34 @@ public class Tweet {
     return theOther.getId().equals(id);
   }
 
-  /**
-  * Builder for TimelineResult
-  **/
-  public static class TimelineResultBuilder {
-    private Tweet toBuild = new Tweet();
+  public void copyFrom(Tweet tweet) {
+    this.favorite_count = tweet.getFavorite_count();
+    this.favorited = tweet.getFavorited();
+    this.retweet_count = tweet.getRetweet_count();
+    this.retweeted = tweet.getRetweeted();
+  }
 
-    public TimelineResultBuilder() {
-    }
+  public Tweet getRetweeted_status() {
+    return retweeted_status;
+  }
 
-    public Tweet build() {
-      return toBuild;
-    }
+  public void setRetweeted_status(Tweet retweeted_status) {
+    this.retweeted_status = retweeted_status;
+  }
 
-    public TimelineResultBuilder coordinates(Coordinates value) {
-      toBuild.coordinates = value;
-      return this;
-    }
-    public TimelineResultBuilder created_at(String value) {
-      toBuild.created_at = value;
-      return this;
-    }
-//    public TimelineResultBuilder entities(Entities value) {
-//      toBuild.entities = value;
-//      return this;
-//    }
-    public TimelineResultBuilder favorited(Boolean value) {
-      toBuild.favorited = value;
-      return this;
-    }
-    public TimelineResultBuilder setFavorite_count(Integer favourites_count) {
-      toBuild.favorite_count = favourites_count;
-      return this;
-    }
-    public TimelineResultBuilder geo(Geo value) {
-      toBuild.geo = value;
-      return this;
-    }
-    public TimelineResultBuilder id(Long value) {
-      toBuild.id = value;
-      return this;
-    }
-    public TimelineResultBuilder id_str(String value) {
-      toBuild.id_str = value;
-      return this;
-    }
-    public TimelineResultBuilder in_reply_to_status_id_str(String value) {
-      toBuild.in_reply_to_status_id_str = value;
-      return this;
-    }
-    public TimelineResultBuilder in_reply_to_user_id_str(String value) {
-      toBuild.in_reply_to_user_id_str = value;
-      return this;
-    }
-//    public TimelineResultBuilder place(Place value) {
-//      toBuild.place = value;
-//      return this;
-//    }
-    public TimelineResultBuilder possibly_sensitive(Boolean value) {
-      toBuild.possibly_sensitive = value;
-      return this;
-    }
-    public TimelineResultBuilder retweet_count(Integer value) {
-      toBuild.retweet_count = value;
-      return this;
-    }
-    public TimelineResultBuilder retweeted(Boolean value) {
-      toBuild.retweeted = value;
-      return this;
-    }
-    public TimelineResultBuilder source(String value) {
-      toBuild.source = value;
-      return this;
-    }
-    public TimelineResultBuilder text(String value) {
-      toBuild.text = value;
-      return this;
-    }
-    public TimelineResultBuilder truncated(Boolean value) {
-      toBuild.truncated = value;
-      return this;
-    }
-    public TimelineResultBuilder user(User value) {
-      toBuild.user = value;
-      return this;
-    }
+  public void setRetweet_count(Integer retweet_count) {
+    this.retweet_count = retweet_count;
+  }
+
+  public void setFavorite_count(Integer favorite_count) {
+    this.favorite_count = favorite_count;
+  }
+
+  public void setRetweeted(Boolean retweeted) {
+    this.retweeted = retweeted;
+  }
+
+  public void setFavorited(Boolean favorited) {
+    this.favorited = favorited;
   }
 }

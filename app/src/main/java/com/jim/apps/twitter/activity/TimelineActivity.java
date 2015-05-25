@@ -12,11 +12,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.jim.apps.twitter.ComposeDialogFragment;
+import com.jim.apps.twitter.OnNewTweetListener;
 import com.jim.apps.twitter.R;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.jim.apps.twitter.TwitterApplication;
@@ -40,7 +42,7 @@ import butterknife.InjectView;
 //import retrofit.client.Response;
 
 public class TimelineActivity extends ActionBarActivity
-                              implements ComposeDialogFragment.OnNewTweetListener {
+                              implements OnNewTweetListener {
   private static final String TAG = "TimelineActivity";
 
   private TweetAdapter tweetListAdapter;
@@ -63,6 +65,9 @@ public class TimelineActivity extends ActionBarActivity
   Long maxId;
 
   Set<Long> localNewTweetIds = new HashSet<>();
+  // Save tweets created by retweet or reply locally, only add them to
+  // adapter when the listview is scrolled
+  List<Tweet> localNewTweets = new ArrayList<>();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -112,13 +117,24 @@ public class TimelineActivity extends ActionBarActivity
         //Log.i(TAG, "page : " + page + ", totalItemsCount : " + totalItemsCount + ", current page : " + GoogleImageSearch.getInstance().getCurrentPage());
         fetchTweets(false);
       }
+
+      @Override
+      public void onScrollStateChanged(AbsListView view, int scrollState) {
+        super.onScrollStateChanged(view, scrollState);
+
+        if(scrollState == SCROLL_STATE_FLING) {
+          insertIntoAdapter(localNewTweets);
+          tweetListAdapter.notifyDataSetChanged();
+          localNewTweets.clear();
+        }
+      }
     });
 
     fab.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
         FragmentManager fm = TimelineActivity.this.getSupportFragmentManager();
-        ComposeDialogFragment dialog = ComposeDialogFragment.newInstance();
+        ComposeDialogFragment dialog = ComposeDialogFragment.newInstance(null, null);
         dialog.show(fm, "Compose a new tweet");
       }
     });
@@ -143,11 +159,7 @@ public class TimelineActivity extends ActionBarActivity
               maxId = tweets.get(tweets.size() - 1).getId();
             }
           } else {
-            for (int i = tweets.size() - 1; i >= 0; i--) {
-              if(!localNewTweetIds.contains(tweets.get(i).getId())) {
-                tweetListAdapter.insert(tweets.get(i), 0);
-              }
-            }
+            insertIntoAdapter(tweets);
           }
 
           sinceId = tweets.get(0).getId();
@@ -216,11 +228,10 @@ public class TimelineActivity extends ActionBarActivity
   @Override
   public void onNewTweet(String text) {
     Log.d(TAG, "-----------onNewTweet : " + text);
-    twitterClient.newTweet(text, new ApiCallback<Tweet>() {
+    twitterClient.newTweet(text, null, new ApiCallback<Tweet>() {
       @Override
       public void success(Tweet tweet) {
-        tweetListAdapter.insert(tweet, 0);
-        localNewTweetIds.add(tweet.getId());
+        onNewTweet(tweet);
       }
 
       @Override
@@ -228,5 +239,36 @@ public class TimelineActivity extends ActionBarActivity
 
       }
     });
+  }
+
+  @Override
+  public void onNewTweet(Tweet tweet) {
+    localNewTweets.add(tweet);
+    //tweetListAdapter.insert(tweet, 0);
+    //tweetListAdapter.notifyDataSetChanged();
+  }
+
+  @Override
+  public void onReplyTweet(Long inReplyId, String text) {
+    Log.d(TAG, "-----------onReplyTweet : " + text + ", inReplyId = " + inReplyId);
+    twitterClient.newTweet(text, inReplyId, new ApiCallback<Tweet>() {
+      @Override
+      public void success(Tweet tweet) {
+        onNewTweet(tweet);
+      }
+
+      @Override
+      public void failure(String error) {
+
+      }
+    });
+  }
+
+  private void insertIntoAdapter(List<Tweet> tweets) {
+    for (int i = tweets.size() - 1; i >= 0; i--) {
+      if(!localNewTweetIds.contains(tweets.get(i).getId())) {
+        tweetListAdapter.insert(tweets.get(i), 0);
+      }
+    }
   }
 }

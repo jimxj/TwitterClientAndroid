@@ -3,17 +3,27 @@
  */
 package com.jim.apps.twitter.adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
+import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.jim.apps.twitter.ComposeDialogFragment;
+import com.jim.apps.twitter.OnNewTweetListener;
 import com.jim.apps.twitter.R;
 import com.facebook.drawee.view.SimpleDraweeView;
+import com.jim.apps.twitter.TwitterApplication;
 import com.jim.apps.twitter.Utils;
+import com.jim.apps.twitter.activity.TimelineActivity;
+import com.jim.apps.twitter.api.ApiCallback;
+import com.jim.apps.twitter.api.TwitterClient;
 import com.jim.apps.twitter.models.Media;
 import com.jim.apps.twitter.models.Tweet;
 
@@ -22,85 +32,176 @@ import java.util.List;
 
 public class TweetAdapter extends ArrayAdapter<Tweet> {
 
-    public static final String TAG = "TweetListAdapter";
-    // View lookup cache
-    private static class ViewHolder {
-      SimpleDraweeView authorImage;
-      TextView userName;
-      TextView screenName;
-      TextView postTime;
-      TextView text;
-      TextView retweetNum;
-      TextView favorateNum;
-      SimpleDraweeView postImage;
-      //TextView likes;
-      //TextView commentNum;
+  public static final String TAG = "TweetListAdapter";
+
+  TwitterClient twitterClient = TwitterApplication.getTwitterClient();
+  private OnNewTweetListener newTweetListener;
+
+  // View lookup cache
+  private static class ViewHolder {
+    SimpleDraweeView authorImage;
+    TextView userName;
+    TextView screenName;
+    TextView postTime;
+    TextView text;
+    TextView retweetNum;
+    TextView favorateNum;
+    SimpleDraweeView postImage;
+    ImageView ivRetweet;
+    ImageView ivFavorate;
+    ImageView ivReply;
+    //TextView likes;
+    //TextView commentNum;
+  }
+
+  public TweetAdapter(Context context, List<Tweet> objects) {
+    super(context, R.layout.item_tweet, objects);
+
+    newTweetListener = (OnNewTweetListener) context;
+  }
+
+  @Override
+  public View getView(int position, View convertView, ViewGroup parent) {
+    final Tweet tweet = getItem(position);
+
+    final ViewHolder viewHolder = null == convertView ? new ViewHolder() :  (ViewHolder) convertView.getTag();
+    if(null == convertView) {
+      convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_tweet, parent, false);
+
+      viewHolder.authorImage = (SimpleDraweeView) convertView.findViewById(R.id.ivProfileImage);
+      viewHolder.userName = (TextView) convertView.findViewById(R.id.tvUserName);
+      viewHolder.screenName = (TextView) convertView.findViewById(R.id.tvScreenName);
+      viewHolder.postTime = (TextView) convertView.findViewById(R.id.tvTime);
+      viewHolder.text = (TextView) convertView.findViewById(R.id.tvText);
+      viewHolder.retweetNum = (TextView) convertView.findViewById(R.id.tvRetweetNum);
+      viewHolder.favorateNum = (TextView) convertView.findViewById(R.id.tvFavorateNum);
+      viewHolder.postImage = (SimpleDraweeView) convertView.findViewById(R.id.ivPhoto);
+      viewHolder.ivFavorate = (ImageView) convertView.findViewById(R.id.ivFavorate);
+      viewHolder.ivRetweet = (ImageView) convertView.findViewById(R.id.ivRetweet);
+      viewHolder.ivReply = (ImageView) convertView.findViewById(R.id.ivReply);
+      //viewHolder.postImage = (SimpleDraweeView) convertView.findViewById(R.id.ivPhoto);
+      //viewHolder.likes = (TextView) convertView.findViewById(R.id.tvLikeNum);
+      //viewHolder.commentNum = (TextView) convertView.findViewById(R.id.tvViewAllComments);
+
+      convertView.setTag(viewHolder);
     }
 
-    public TweetAdapter(Context context, List<Tweet> objects) {
-      super(context, R.layout.item_tweet, objects);
+    viewHolder.authorImage.setImageURI(Uri.parse(tweet.getUser().getProfile_image_url()));
+
+    //viewHolder.postImage.setImageURI(Uri.parse(photo.getImages().getStandard_resolution().getUrl()));
+
+    viewHolder.postTime.setText(Utils.getRelativeTimeAgo(tweet.getCreated_at()));
+
+    viewHolder.userName.setText(tweet.getUser().getName());
+    viewHolder.screenName.setText("@" + tweet.getUser().getScreen_name());
+    viewHolder.text.setText(tweet.getText());
+    viewHolder.retweetNum.setText(String.valueOf(tweet.getRetweet_count()));
+    viewHolder.favorateNum.setText(String.valueOf(tweet.getFavorite_count()));
+
+    String mediaUrl = null;
+    if(null != tweet.getEntities() && null != tweet.getEntities().getMedia() && tweet.getEntities().getMedia().size() > 0) {
+      Media media = tweet.getEntities().getMedia().get(0);
+      mediaUrl = media.getMedia_url();
+    }
+    if(null != mediaUrl) {
+      viewHolder.postImage.setImageURI(Uri.parse(mediaUrl));
+      viewHolder.postImage.setVisibility(View.VISIBLE);
+
+      android.view.ViewGroup.LayoutParams layoutParams = viewHolder.postImage.getLayoutParams();
+      //layoutParams.width = 80;
+      layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+      viewHolder.postImage.setLayoutParams(layoutParams);
+    } else {
+      viewHolder.postImage.setVisibility(View.INVISIBLE);
+
+      android.view.ViewGroup.LayoutParams layoutParams = viewHolder.postImage.getLayoutParams();
+      //layoutParams.width = 80;
+      layoutParams.height = 0;
+      viewHolder.postImage.setLayoutParams(layoutParams);
     }
 
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-      final Tweet tweet = getItem(position);
+    viewHolder.ivRetweet.setImageResource(getRetweetIconResource(tweet.getRetweeted()));
 
-      final ViewHolder viewHolder = null == convertView ? new ViewHolder() :  (ViewHolder) convertView.getTag();
-      if(null == convertView) {
-        convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_tweet, parent, false);
+    viewHolder.ivFavorate.setImageResource(getFavorateIconResource(tweet.getFavorited()));
 
-        viewHolder.authorImage = (SimpleDraweeView) convertView.findViewById(R.id.ivProfileImage);
-        viewHolder.userName = (TextView) convertView.findViewById(R.id.tvUserName);
-        viewHolder.screenName = (TextView) convertView.findViewById(R.id.tvScreenName);
-        viewHolder.postTime = (TextView) convertView.findViewById(R.id.tvTime);
-        viewHolder.text = (TextView) convertView.findViewById(R.id.tvText);
-        viewHolder.retweetNum = (TextView) convertView.findViewById(R.id.tvRetweetNum);
-        viewHolder.favorateNum = (TextView) convertView.findViewById(R.id.tvFavorateNum);
-        viewHolder.postImage = (SimpleDraweeView) convertView.findViewById(R.id.ivPhoto);
-        //viewHolder.postImage = (SimpleDraweeView) convertView.findViewById(R.id.ivPhoto);
-        //viewHolder.likes = (TextView) convertView.findViewById(R.id.tvLikeNum);
-        //viewHolder.commentNum = (TextView) convertView.findViewById(R.id.tvViewAllComments);
+    viewHolder.ivRetweet.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        Log.d(TAG, "-----------ivRetweet.onClick : " + tweet.getText());
+        viewHolder.ivRetweet.setImageResource(getRetweetIconResource(!tweet.getRetweeted()));
+        viewHolder.retweetNum.setText(String.valueOf(!tweet.getRetweeted() ? tweet.getRetweet_count() + 1 : tweet.getRetweet_count() - 1));
 
-        convertView.setTag(viewHolder);
+        twitterClient.reTweet(tweet.getId(), new ApiCallback<Tweet>() {
+          @Override
+          public void success(Tweet newTweet) {
+            tweet.copyFrom(newTweet.getRetweeted_status());
+            newTweetListener.onNewTweet(newTweet);
+          }
+
+          @Override
+          public void failure(String error) {
+            viewHolder.ivRetweet.setImageResource(getRetweetIconResource(tweet.getRetweeted()));
+            viewHolder.retweetNum.setText(String.valueOf(tweet.getRetweet_count()));
+          }
+        });
       }
+    });
 
-      viewHolder.authorImage.setImageURI(Uri.parse(tweet.getUser().getProfile_image_url()));
+    viewHolder.ivFavorate.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        Log.d(TAG, "-----------ivFavorate.onClick : " + tweet.getText());
+        // Change first, then revert in failure
+        viewHolder.ivFavorate.setImageResource(getFavorateIconResource(!tweet.getFavorited()));
+        viewHolder.favorateNum.setText(String.valueOf(!tweet.getFavorited() ? tweet.getFavorite_count() + 1 : tweet.getFavorite_count() - 1));
 
-      //viewHolder.postImage.setImageURI(Uri.parse(photo.getImages().getStandard_resolution().getUrl()));
+        twitterClient.favorite(tweet.getId(), !tweet.getFavorited(), new ApiCallback<Tweet>() {
+          @Override
+          public void success(Tweet newTweet) {
+            tweet.copyFrom(newTweet);
+          }
 
-      viewHolder.postTime.setText(Utils.getRelativeTimeAgo(tweet.getCreated_at()));
-
-      viewHolder.userName.setText(tweet.getUser().getName());
-      viewHolder.screenName.setText("@" + tweet.getUser().getScreen_name());
-      viewHolder.text.setText(tweet.getText());
-      viewHolder.retweetNum.setText(String.valueOf(tweet.getRetweet_count()));
-      viewHolder.favorateNum.setText(String.valueOf(tweet.getFavorite_count()));
-
-      String mediaUrl = null;
-      if(null != tweet.getEntities() && null != tweet.getEntities().getMedia() && tweet.getEntities().getMedia().size() > 0) {
-        Media media = tweet.getEntities().getMedia().get(0);
-        mediaUrl = media.getMedia_url();
+          @Override
+          public void failure(String error) {
+            viewHolder.ivFavorate.setImageResource(getFavorateIconResource(tweet.getFavorited()));
+            viewHolder.favorateNum.setText(String.valueOf(tweet.getFavorite_count()));
+          }
+        });
       }
-      if(null != mediaUrl) {
-        viewHolder.postImage.setImageURI(Uri.parse(mediaUrl));
-        viewHolder.postImage.setVisibility(View.VISIBLE);
+    });
 
-        android.view.ViewGroup.LayoutParams layoutParams = viewHolder.postImage.getLayoutParams();
-        //layoutParams.width = 80;
-        layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-        viewHolder.postImage.setLayoutParams(layoutParams);
-      } else {
-        viewHolder.postImage.setVisibility(View.INVISIBLE);
-
-        android.view.ViewGroup.LayoutParams layoutParams = viewHolder.postImage.getLayoutParams();
-        //layoutParams.width = 80;
-        layoutParams.height = 0;
-        viewHolder.postImage.setLayoutParams(layoutParams);
+    viewHolder.ivReply.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        FragmentManager fm = ((TimelineActivity) getContext()).getSupportFragmentManager();
+        ComposeDialogFragment dialog = ComposeDialogFragment.newInstance(tweet.getId(), tweet.getUser().getScreen_name());
+        dialog.show(fm, "Reply a tweet");
       }
-      //viewHolder.likes.setText(Utils.formatInt(photo.getLikes().getCount()) + " likes");
+    });
 
-      //viewHolder.commentNum.setText("View all " + Utils.formatInt(photo.getComments().getCount()) + " comments");
+    //viewHolder.likes.setText(Utils.formatInt(photo.getLikes().getCount()) + " likes");
 
-      return convertView;
+    //viewHolder.commentNum.setText("View all " + Utils.formatInt(photo.getComments().getCount()) + " comments");
+
+    return convertView;
+  }
+
+  private int getRetweetIconResource(boolean isRetweeted) {
+    return isRetweeted ? R.drawable.retweet_on : R.drawable.retweet;
+  }
+
+  private int getFavorateIconResource(boolean isFavorated) {
+    return isFavorated ? R.drawable.favorite_on : R.drawable.favorite;
+  }
+
+  private void replaceTweet(Tweet tweet) {
+    for(int i = 0; i < getCount(); i++) {
+      if(getItem(i).getId().equals(tweet.getId())) {
+        Log.d("TwitterClient", "----------replace tweet " + tweet.getId() + " at index " + i);
+        insert(tweet, i);
+        remove(getItem(i));
+        break;
+      }
     }
+  }
 }

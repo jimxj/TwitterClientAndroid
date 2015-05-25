@@ -62,6 +62,7 @@ public class TwitterClient extends OAuthBaseClient {
   public void getHomeTimeline(Long sinceId, Long maxId, Integer count, final ApiCallback<List<Tweet>> callback) {
      //simpleTwitterApi.getHomeTimeline(sinceId, maxId, 20, callback);
     String apiUrl = getApiUrl("statuses/home_timeline.json");
+    Log.d(TAG, "-------------getHomeTimeline, url = " + apiUrl + ", sinceId = " + sinceId + ", maxId = " + maxId);
     RequestParams params = new RequestParams();
     params.put("count", 20);
     if (null != sinceId) {
@@ -74,7 +75,8 @@ public class TwitterClient extends OAuthBaseClient {
     getClient().get(apiUrl, params, new AsyncHttpResponseHandler() {
       @Override
       public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-        Type type = new TypeToken<List<Tweet>>() {}.getType();
+        Type type = new TypeToken<List<Tweet>>() {
+        }.getType();
         callback.success((List<Tweet>) gson.fromJson(new StringReader(new String(responseBody)), type));
         Log.d(TAG, "-------------getHomeTimeline response : \n" + new String(responseBody));
       }
@@ -86,10 +88,14 @@ public class TwitterClient extends OAuthBaseClient {
     });
   }
 
-  public void newTweet(String text, final ApiCallback<Tweet> callback) {
+  public void newTweet(String text, Long inReplyToId, final ApiCallback<Tweet> callback) {
     String apiUrl = getApiUrl("statuses/update.json");
+    Log.d(TAG, "-------------newTweet, url = " + apiUrl + ", inReplyToId = " + inReplyToId);
     RequestParams params = new RequestParams();
     params.put("status", text);
+    if(null != inReplyToId) {
+      params.put("in_reply_to_status_id", inReplyToId);
+    }
 
     getClient().post(apiUrl, params, new AsyncHttpResponseHandler() {
       @Override
@@ -100,11 +106,63 @@ public class TwitterClient extends OAuthBaseClient {
 
       @Override
       public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-        callback.failure("Status code : " + statusCode + ", response body :\n" + new String(responseBody));
+        callback.failure("NewTweet Status code : " + statusCode + ", response body :\n" + new String(responseBody));
       }
     });
   }
 
+  public void reTweet(Long id, final ApiCallback<Tweet> callback) {
+    String apiUrl = getApiUrl("statuses/retweet/" + id +".json");
+    Log.d(TAG, "-------------reTweet, url = " + apiUrl);
+    getClient().post(apiUrl, null, new AsyncHttpResponseHandler() {
+      @Override
+      public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+        callback.success(gson.fromJson(new StringReader(new String(responseBody)), Tweet.class));
+        Log.d(TAG, "-------------reTweet response : \n" + new String(responseBody));
+      }
+
+      @Override
+      public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+        callback.failure("reTweet Status code : " + statusCode + ", response body :\n" + new String(responseBody));
+      }
+    });
+  }
+
+  public void destroyTweet(Long id, final ApiCallback<Tweet> callback) {
+    String apiUrl = getApiUrl("statuses/destroy/" + id +".json");
+    getClient().post(apiUrl, null, new AsyncHttpResponseHandler() {
+      @Override
+      public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+        callback.success(gson.fromJson(new StringReader(new String(responseBody)), Tweet.class));
+        Log.d(TAG, "-------------reTweet response : \n" + new String(responseBody));
+      }
+
+      @Override
+      public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+        callback.failure("reTweet Status code : " + statusCode + ", response body :\n" + new String(responseBody));
+      }
+    });
+  }
+
+  public void favorite(Long id, boolean toCreate, final ApiCallback<Tweet> callback) {
+    String apiUrl = getApiUrl("favorites/" + (toCreate ? "create" : "destroy") + ".json");
+    Log.d(TAG, "-------------favorite, url = " + apiUrl + ", toCreate = " + toCreate);
+    RequestParams params = new RequestParams();
+    params.put("id", id);
+
+    getClient().post(apiUrl, params, new AsyncHttpResponseHandler() {
+      @Override
+      public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+        callback.success(gson.fromJson(new StringReader(new String(responseBody)), Tweet.class));
+        Log.d(TAG, "-------------favorite response : \n" + new String(responseBody));
+      }
+
+      @Override
+      public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+        callback.failure("favorite Status code : " + statusCode + ", response body :\n" + new String(responseBody));
+      }
+    });
+  }
 
 	/* 1. Define the endpoint URL with getApiUrl and pass a relative path to the endpoint
 	 * 	  i.e getApiUrl("statuses/home_timeline.json");
