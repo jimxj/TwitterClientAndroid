@@ -61,7 +61,7 @@
             android:id="@+id/btnCancel"
             android:text="@string/cancel"
             android:textColor="@color/white"
-            android:background="@color/gray"
+            android:background="@color/silver"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
