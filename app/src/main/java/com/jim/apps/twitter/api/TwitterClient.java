@@ -85,6 +85,25 @@ public class TwitterClient extends OAuthBaseClient {
     });
   }
 
+  public void newTweet(String text, final ApiCallback<Tweet> callback) {
+    String apiUrl = getApiUrl("statuses/update.json");
+    RequestParams params = new RequestParams();
+    params.put("status", text);
+
+    getClient().post(apiUrl, params, new AsyncHttpResponseHandler() {
+      @Override
+      public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+        callback.success(gson.fromJson(new StringReader(new String(responseBody)), Tweet.class));
+        Log.d(TAG, "-------------newTweet response : \n" + new String(responseBody));
+      }
+
+      @Override
+      public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+        callback.failure("Status code : " + statusCode + ", response body :\n" + new String(responseBody));
+      }
+    });
+  }
+
 
 	/* 1. Define the endpoint URL with getApiUrl and pass a relative path to the endpoint
 	 * 	  i.e getApiUrl("statuses/home_timeline.json");

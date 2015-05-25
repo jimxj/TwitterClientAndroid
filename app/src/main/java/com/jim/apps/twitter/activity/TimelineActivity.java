@@ -1,5 +1,7 @@
 package com.jim.apps.twitter.activity;
 
+import android.app.Activity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -8,9 +10,11 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.ListView;
 
+import com.jim.apps.twitter.ComposeDialogFragment;
 import com.jim.apps.twitter.R;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.jim.apps.twitter.TwitterApplication;
@@ -19,6 +23,7 @@ import com.jim.apps.twitter.api.ApiCallback;
 import com.jim.apps.twitter.api.TwitterClient;
 import com.jim.apps.twitter.models.Tweet;
 import com.jim.apps.twitter.util.EndlessScrollListener;
+import com.melnykov.fab.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,7 +35,8 @@ import butterknife.InjectView;
 //import retrofit.RetrofitError;
 //import retrofit.client.Response;
 
-public class TimelineActivity extends ActionBarActivity {
+public class TimelineActivity extends ActionBarActivity
+                              implements ComposeDialogFragment.OnNewTweetListener {
   private static final String TAG = "TimelineActivity";
 
   private TweetAdapter tweetListAdapter;
@@ -43,6 +49,9 @@ public class TimelineActivity extends ActionBarActivity {
 
   @InjectView(R.id.tbMain)
   Toolbar toolbar;
+
+  @InjectView(R.id.fab)
+  FloatingActionButton fab;
 
   TwitterClient twitterClient;
 
@@ -64,7 +73,7 @@ public class TimelineActivity extends ActionBarActivity {
     tweetListAdapter = new TweetAdapter(this, new ArrayList<Tweet>());
     lvTimeline.setAdapter(tweetListAdapter);
 
-    //fetchTweets(true);
+    fetchTweets(true);
 
     // Setup refresh listener which triggers new data loading
     swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -88,6 +97,15 @@ public class TimelineActivity extends ActionBarActivity {
       public void onLoadMore(int page, int totalItemsCount) {
         //Log.i(TAG, "page : " + page + ", totalItemsCount : " + totalItemsCount + ", current page : " + GoogleImageSearch.getInstance().getCurrentPage());
         fetchTweets(false);
+      }
+    });
+
+    fab.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        FragmentManager fm = TimelineActivity.this.getSupportFragmentManager();
+        ComposeDialogFragment dialog = ComposeDialogFragment.newInstance();
+        dialog.show(fm, "Compose a new tweet");
       }
     });
   }
@@ -177,5 +195,21 @@ public class TimelineActivity extends ActionBarActivity {
     //toolbar.setSubtitle("Sub");
 
     //toolbar.setLogo(R.drawable.ic_launcher);
+  }
+
+  @Override
+  public void onNewTweet(String text) {
+    Log.d(TAG, "-----------onNewTweet : " + text);
+    twitterClient.newTweet(text, new ApiCallback<Tweet>() {
+      @Override
+      public void success(Tweet tweet) {
+        tweetListAdapter.insert(tweet, 0);
+      }
+
+      @Override
+      public void failure(String error) {
+
+      }
+    });
   }
 }

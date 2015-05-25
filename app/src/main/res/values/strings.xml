@@ -7,5 +7,7 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="btnTweet">Tweet</string>
+    <string name="cancel">Cancel</string>
 
 </resources>
