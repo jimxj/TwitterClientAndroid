@@ -29,7 +29,9 @@ import com.melnykov.fab.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -59,6 +61,8 @@ public class TimelineActivity extends ActionBarActivity
 
   Long sinceId = 1l;
   Long maxId;
+
+  Set<Long> localNewTweetIds = new HashSet<>();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -140,7 +144,9 @@ public class TimelineActivity extends ActionBarActivity
             }
           } else {
             for (int i = tweets.size() - 1; i >= 0; i--) {
-              tweetListAdapter.insert(tweets.get(i), 0);
+              if(!localNewTweetIds.contains(tweets.get(i).getId())) {
+                tweetListAdapter.insert(tweets.get(i), 0);
+              }
             }
           }
 
@@ -214,6 +220,7 @@ public class TimelineActivity extends ActionBarActivity
       @Override
       public void success(Tweet tweet) {
         tweetListAdapter.insert(tweet, 0);
+        localNewTweetIds.add(tweet.getId());
       }
 
       @Override

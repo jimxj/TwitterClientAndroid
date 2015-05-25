@@ -149,6 +149,16 @@ public class Tweet {
     return user;
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if(null == o) {
+      return false;
+    }
+
+    Tweet theOther = (Tweet) o;
+    return theOther.getId().equals(id);
+  }
+
   /**
   * Builder for TimelineResult
   **/
