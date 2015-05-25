@@ -19,6 +19,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import fr.tvbarthel.lib.blurdialogfragment.BlurDialogEngine;
@@ -124,6 +125,14 @@ public class ComposeDialogFragment extends DialogFragment {
         tvCharCount.setText(String.valueOf(MAX_LENGTH - etText.getText().toString().length()));
       }
 
+    });
+
+    ImageView ivClose = (ImageView) view.findViewById(R.id.ivCloseDialog);
+    ivClose.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        ComposeDialogFragment.this.dismiss();
+      }
     });
 
     DisplayMetrics metrics = new DisplayMetrics();

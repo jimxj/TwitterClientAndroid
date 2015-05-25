@@ -1,6 +1,7 @@
 package com.jim.apps.twitter.activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
@@ -11,6 +12,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 
@@ -72,6 +74,14 @@ public class TimelineActivity extends ActionBarActivity
 
     tweetListAdapter = new TweetAdapter(this, new ArrayList<Tweet>());
     lvTimeline.setAdapter(tweetListAdapter);
+
+    lvTimeline.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+      @Override
+      public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Intent i = new Intent(TimelineActivity.this, TweetDetailsActivity.class);
+        startActivity(i);
+      }
+    });
 
     fetchTweets(true);
 
