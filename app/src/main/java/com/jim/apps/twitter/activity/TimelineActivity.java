@@ -299,6 +299,10 @@ public class TimelineActivity extends ActionBarActivity
     });
   }
 
+  /**
+   * Insert the new fetched tweets on the top of the list
+   * @param tweets
+   */
   private void insertIntoAdapter(List<Tweet> tweets) {
     for (int i = tweets.size() - 1; i >= 0; i--) {
       if(!localNewTweetIds.contains(tweets.get(i).getId())) {

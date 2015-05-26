@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -79,6 +80,9 @@ public class TweetDetailsActivity extends ActionBarActivity implements OnNewTwee
 
   @InjectView(R.id.ivFavorate)
   ImageView ivFavorate;
+
+  @InjectView(R.id.ivShare)
+  ImageView ivShare;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -172,6 +176,16 @@ public class TweetDetailsActivity extends ActionBarActivity implements OnNewTwee
     FragmentManager fm = this.getSupportFragmentManager();
     ComposeDialogFragment dialog = ComposeDialogFragment.newInstance(tweet.getId(), tweet.getUser().getScreen_name());
     dialog.show(fm, "Reply a tweet");
+  }
+
+  @OnClick(R.id.ivShare)
+  public void onShareClick() {
+    Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+    sharingIntent.setType("text/html");
+    sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, Html.fromHtml("<p>\"" + tweet.getText() + "\" from "
+            + tweet.getUser().getName() + "(@"+ tweet.getUser().getScreen_name() + ")"
+            + "</p>"));
+    startActivity(Intent.createChooser(sharingIntent, "Share a tweet"));
   }
 
   @Override
