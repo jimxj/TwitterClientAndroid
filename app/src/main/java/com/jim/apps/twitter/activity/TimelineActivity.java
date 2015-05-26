@@ -1,10 +1,8 @@
 package com.jim.apps.twitter.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -14,7 +12,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.jim.apps.twitter.ComposeDialogFragment;
@@ -26,11 +23,10 @@ import com.jim.apps.twitter.adapter.TweetAdapter;
 import com.jim.apps.twitter.api.ApiCallback;
 import com.jim.apps.twitter.api.TwitterClient;
 import com.jim.apps.twitter.models.Tweet;
-import com.jim.apps.twitter.util.EndlessScrollListener;
+import com.jim.apps.twitter.customview.EndlessScrollListener;
 import com.melnykov.fab.FloatingActionButton;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -69,6 +65,8 @@ public class TimelineActivity extends ActionBarActivity
   // adapter when the listview is scrolled
   List<Tweet> localNewTweets = new ArrayList<>();
 
+  boolean needRefresh;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -88,7 +86,9 @@ public class TimelineActivity extends ActionBarActivity
       @Override
       public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Intent i = new Intent(TimelineActivity.this, TweetDetailsActivity.class);
-        startActivity(i);
+        i.putExtra("tweet", tweetListAdapter.getItem(position));
+        i.putExtra("index", position);
+        startActivityForResult(i, TweetDetailsActivity.REQUEST_CODE);
       }
     });
 
@@ -123,9 +123,13 @@ public class TimelineActivity extends ActionBarActivity
         super.onScrollStateChanged(view, scrollState);
 
         if(scrollState == SCROLL_STATE_FLING) {
-          insertIntoAdapter(localNewTweets);
-          tweetListAdapter.notifyDataSetChanged();
-          localNewTweets.clear();
+          if(localNewTweets.size() > 0) {
+            insertIntoAdapter(localNewTweets);
+            tweetListAdapter.notifyDataSetChanged();
+            localNewTweets.clear();
+          } else if(needRefresh) {
+            fetchTweets(true);
+          }
         }
       }
     });
@@ -144,42 +148,42 @@ public class TimelineActivity extends ActionBarActivity
     Log.d(TAG, "--------------fetchTweets, isLoadingLatest = " + isLoadingLatest + ", sinceId = " + sinceId + ", maxId = " + maxId);
     twitterClient.getHomeTimeline(isLoadingLatest ? sinceId : null,
             !isLoadingLatest ? maxId : null, null, new ApiCallback<List<Tweet>>() {
-      @Override
-      public void success(List<Tweet> tweets) {
-        Log.d(TAG, "fetched " + tweets.size() + " new tweets : " + tweets);
-        if(0 == tweets.size()) {
-          swipeContainer.setRefreshing(false);
-          return;
-        }
+              @Override
+              public void success(List<Tweet> tweets) {
+                Log.d(TAG, "fetched " + tweets.size() + " new tweets : " + tweets);
+                if (0 == tweets.size()) {
+                  swipeContainer.setRefreshing(false);
+                  return;
+                }
 
-        if(isLoadingLatest) {
-          if (1 == sinceId) {
-            tweetListAdapter.addAll(tweets);
-            if(null == maxId) {
-              maxId = tweets.get(tweets.size() - 1).getId();
-            }
-          } else {
-            insertIntoAdapter(tweets);
-          }
+                if (isLoadingLatest) {
+                  if (1 == sinceId) {
+                    tweetListAdapter.addAll(tweets);
+                    if (null == maxId) {
+                      maxId = tweets.get(tweets.size() - 1).getId();
+                    }
+                  } else {
+                    insertIntoAdapter(tweets);
+                  }
 
-          sinceId = tweets.get(0).getId();
-        } else {
-          tweetListAdapter.addAll(tweets);
-          maxId = tweets.get(tweets.size() - 1).getId();
-        }
+                  sinceId = tweets.get(0).getId();
+                } else {
+                  tweetListAdapter.addAll(tweets);
+                  maxId = tweets.get(tweets.size() - 1).getId();
+                }
 
-        tweetListAdapter.notifyDataSetChanged();
+                tweetListAdapter.notifyDataSetChanged();
 
-        swipeContainer.setRefreshing(false);
-      }
+                swipeContainer.setRefreshing(false);
+              }
 
-      @Override
-      public void failure(String error) {
-        Log.e(TAG, "Failed to fetch tweets : " + error);
+              @Override
+              public void failure(String error) {
+                Log.e(TAG, "Failed to fetch tweets : " + error);
 
-        swipeContainer.setRefreshing(false);
-      }
-    });
+                swipeContainer.setRefreshing(false);
+              }
+            });
   }
 
   @Override
@@ -202,6 +206,37 @@ public class TimelineActivity extends ActionBarActivity
     }
 
     return super.onOptionsItemSelected(item);
+  }
+
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if(requestCode == TweetDetailsActivity.REQUEST_CODE) {
+      int status = data.getIntExtra("status", 0);
+      if((status & TweetDetailsActivity.STATUS_UPDATED) == TweetDetailsActivity.STATUS_UPDATED) {
+        int index = data.getIntExtra("index", -1);
+        Tweet updatedTweet = (Tweet) data.getSerializableExtra("tweet");
+        if(index >= 0 && null != updatedTweet) {
+          tweetListAdapter.getItem(index).copyFrom(updatedTweet);
+          updateRow(updatedTweet.getId());
+        }
+      }
+
+      if((status & TweetDetailsActivity.STATUS_ADDED) == TweetDetailsActivity.STATUS_ADDED) {
+        //fetchTweets(true);
+        needRefresh = true;
+      }
+    }
+  }
+
+  private void updateRow(Long tweetId) {
+    int start = lvTimeline.getFirstVisiblePosition();
+    for (int i = start, j = lvTimeline.getLastVisiblePosition(); i <= j; i++) {
+      if (tweetId.equals(((Tweet) lvTimeline.getItemAtPosition(i)).getId())) {
+        View view = lvTimeline.getChildAt(i - start);
+        lvTimeline.getAdapter().getView(i, view, lvTimeline);
+        break;
+      }
+    }
   }
 
   private void setupActionBar() {

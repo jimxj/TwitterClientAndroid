@@ -3,7 +3,6 @@
  */
 package com.jim.apps.twitter.adapter;
 
-import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 import android.support.v4.app.FragmentManager;
@@ -20,12 +19,13 @@ import com.jim.apps.twitter.OnNewTweetListener;
 import com.jim.apps.twitter.R;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.jim.apps.twitter.TwitterApplication;
-import com.jim.apps.twitter.Utils;
+import com.jim.apps.twitter.util.DateUtil;
 import com.jim.apps.twitter.activity.TimelineActivity;
 import com.jim.apps.twitter.api.ApiCallback;
 import com.jim.apps.twitter.api.TwitterClient;
-import com.jim.apps.twitter.models.Media;
 import com.jim.apps.twitter.models.Tweet;
+import com.jim.apps.twitter.customview.LinkifiedTextView;
+import com.jim.apps.twitter.util.ResourceUtil;
 
 import java.util.List;
 
@@ -43,7 +43,7 @@ public class TweetAdapter extends ArrayAdapter<Tweet> {
     TextView userName;
     TextView screenName;
     TextView postTime;
-    TextView text;
+    LinkifiedTextView text;
     TextView retweetNum;
     TextView favorateNum;
     SimpleDraweeView postImage;
@@ -72,7 +72,7 @@ public class TweetAdapter extends ArrayAdapter<Tweet> {
       viewHolder.userName = (TextView) convertView.findViewById(R.id.tvUserName);
       viewHolder.screenName = (TextView) convertView.findViewById(R.id.tvScreenName);
       viewHolder.postTime = (TextView) convertView.findViewById(R.id.tvTime);
-      viewHolder.text = (TextView) convertView.findViewById(R.id.tvText);
+      viewHolder.text = (LinkifiedTextView) convertView.findViewById(R.id.tvText);
       viewHolder.retweetNum = (TextView) convertView.findViewById(R.id.tvRetweetNum);
       viewHolder.favorateNum = (TextView) convertView.findViewById(R.id.tvFavorateNum);
       viewHolder.postImage = (SimpleDraweeView) convertView.findViewById(R.id.ivPhoto);
@@ -90,7 +90,7 @@ public class TweetAdapter extends ArrayAdapter<Tweet> {
 
     //viewHolder.postImage.setImageURI(Uri.parse(photo.getImages().getStandard_resolution().getUrl()));
 
-    viewHolder.postTime.setText(Utils.getRelativeTimeAgo(tweet.getCreated_at()));
+    viewHolder.postTime.setText(DateUtil.getRelativeTimeAgo(tweet.getCreated_at()));
 
     viewHolder.userName.setText(tweet.getUser().getName());
     viewHolder.screenName.setText("@" + tweet.getUser().getScreen_name());
@@ -98,11 +98,7 @@ public class TweetAdapter extends ArrayAdapter<Tweet> {
     viewHolder.retweetNum.setText(String.valueOf(tweet.getRetweet_count()));
     viewHolder.favorateNum.setText(String.valueOf(tweet.getFavorite_count()));
 
-    String mediaUrl = null;
-    if(null != tweet.getEntities() && null != tweet.getEntities().getMedia() && tweet.getEntities().getMedia().size() > 0) {
-      Media media = tweet.getEntities().getMedia().get(0);
-      mediaUrl = media.getMedia_url();
-    }
+    String mediaUrl = tweet.getFirstPhotoMediaUrl();
     if(null != mediaUrl) {
       viewHolder.postImage.setImageURI(Uri.parse(mediaUrl));
       viewHolder.postImage.setVisibility(View.VISIBLE);
@@ -120,15 +116,15 @@ public class TweetAdapter extends ArrayAdapter<Tweet> {
       viewHolder.postImage.setLayoutParams(layoutParams);
     }
 
-    viewHolder.ivRetweet.setImageResource(getRetweetIconResource(tweet.getRetweeted()));
+    viewHolder.ivRetweet.setImageResource(ResourceUtil.getRetweetIconResource(tweet.getRetweeted()));
 
-    viewHolder.ivFavorate.setImageResource(getFavorateIconResource(tweet.getFavorited()));
+    viewHolder.ivFavorate.setImageResource(ResourceUtil.getFavorateIconResource(tweet.getFavorited()));
 
     viewHolder.ivRetweet.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
         Log.d(TAG, "-----------ivRetweet.onClick : " + tweet.getText());
-        viewHolder.ivRetweet.setImageResource(getRetweetIconResource(!tweet.getRetweeted()));
+        viewHolder.ivRetweet.setImageResource(ResourceUtil.getRetweetIconResource(!tweet.getRetweeted()));
         viewHolder.retweetNum.setText(String.valueOf(!tweet.getRetweeted() ? tweet.getRetweet_count() + 1 : tweet.getRetweet_count() - 1));
 
         twitterClient.reTweet(tweet.getId(), new ApiCallback<Tweet>() {
@@ -140,7 +136,7 @@ public class TweetAdapter extends ArrayAdapter<Tweet> {
 
           @Override
           public void failure(String error) {
-            viewHolder.ivRetweet.setImageResource(getRetweetIconResource(tweet.getRetweeted()));
+            viewHolder.ivRetweet.setImageResource(ResourceUtil.getRetweetIconResource(tweet.getRetweeted()));
             viewHolder.retweetNum.setText(String.valueOf(tweet.getRetweet_count()));
           }
         });
@@ -152,7 +148,7 @@ public class TweetAdapter extends ArrayAdapter<Tweet> {
       public void onClick(View v) {
         Log.d(TAG, "-----------ivFavorate.onClick : " + tweet.getText());
         // Change first, then revert in failure
-        viewHolder.ivFavorate.setImageResource(getFavorateIconResource(!tweet.getFavorited()));
+        viewHolder.ivFavorate.setImageResource(ResourceUtil.getFavorateIconResource(!tweet.getFavorited()));
         viewHolder.favorateNum.setText(String.valueOf(!tweet.getFavorited() ? tweet.getFavorite_count() + 1 : tweet.getFavorite_count() - 1));
 
         twitterClient.favorite(tweet.getId(), !tweet.getFavorited(), new ApiCallback<Tweet>() {
@@ -163,7 +159,7 @@ public class TweetAdapter extends ArrayAdapter<Tweet> {
 
           @Override
           public void failure(String error) {
-            viewHolder.ivFavorate.setImageResource(getFavorateIconResource(tweet.getFavorited()));
+            viewHolder.ivFavorate.setImageResource(ResourceUtil.getFavorateIconResource(tweet.getFavorited()));
             viewHolder.favorateNum.setText(String.valueOf(tweet.getFavorite_count()));
           }
         });
@@ -184,24 +180,5 @@ public class TweetAdapter extends ArrayAdapter<Tweet> {
     //viewHolder.commentNum.setText("View all " + Utils.formatInt(photo.getComments().getCount()) + " comments");
 
     return convertView;
-  }
-
-  private int getRetweetIconResource(boolean isRetweeted) {
-    return isRetweeted ? R.drawable.retweet_on : R.drawable.retweet;
-  }
-
-  private int getFavorateIconResource(boolean isFavorated) {
-    return isFavorated ? R.drawable.favorite_on : R.drawable.favorite;
-  }
-
-  private void replaceTweet(Tweet tweet) {
-    for(int i = 0; i < getCount(); i++) {
-      if(getItem(i).getId().equals(tweet.getId())) {
-        Log.d("TwitterClient", "----------replace tweet " + tweet.getId() + " at index " + i);
-        insert(tweet, i);
-        remove(getItem(i));
-        break;
-      }
-    }
   }
 }

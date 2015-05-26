@@ -5,6 +5,7 @@
 
 package com.jim.apps.twitter.models;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -33,7 +34,7 @@ import java.util.List;
 
  */
 
-public class Media {
+public class Media implements Serializable {
 
   
   private String display_url;

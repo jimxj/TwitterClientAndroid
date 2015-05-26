@@ -6,6 +6,8 @@
 package com.jim.apps.twitter.models;
 
 
+import java.io.Serializable;
+
 /**
  * Generated from json example
 {
@@ -32,7 +34,7 @@ package com.jim.apps.twitter.models;
 
  */
 
-public class User {
+public class User implements Serializable {
 
   
   private Boolean contributors_enabled;

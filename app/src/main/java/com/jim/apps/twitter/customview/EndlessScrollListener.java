@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2012-2015 Magnet Systems. All rights reserved.
  */
-package com.jim.apps.twitter.util;
+package com.jim.apps.twitter.customview;
 
 import android.widget.AbsListView;
 

@@ -5,6 +5,7 @@
 
 package com.jim.apps.twitter.models;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -19,7 +20,7 @@ import java.util.List;
 
  */
 
-public class User_mention {
+public class User_mention implements Serializable {
 
   
   private Long id;

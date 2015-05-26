@@ -6,6 +6,8 @@
 package com.jim.apps.twitter.models;
 
 
+import java.io.Serializable;
+
 /**
  * Generated from json example
 {
@@ -16,7 +18,7 @@ package com.jim.apps.twitter.models;
 
  */
 
-public class Medium {
+public class Medium implements Serializable {
 
   
   private Integer h;

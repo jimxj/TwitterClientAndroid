@@ -5,6 +5,7 @@
 
 package com.jim.apps.twitter.models;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -16,7 +17,7 @@ import java.util.List;
 
  */
 
-public class Coordinates {
+public class Coordinates implements Serializable  {
 
   
   private List<java.lang.Double> coordinates;

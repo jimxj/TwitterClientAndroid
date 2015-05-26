@@ -5,6 +5,7 @@
 
 package com.jim.apps.twitter.models;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -17,7 +18,7 @@ import java.util.List;
 
  */
 
-public class Entities {
+public class Entities implements Serializable {
 
   
   //private List<java.lang.String> hashtags;
