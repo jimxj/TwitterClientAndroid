@@ -46,7 +46,6 @@ public class TweetDetailsActivity extends ActionBarActivity implements OnNewTwee
   private int index;
 
   TwitterClient twitterClient = TwitterApplication.getTwitterClient();
-  private OnNewTweetListener newTweetListener;
 
   @InjectView(R.id.tbTweetDetail)
   Toolbar toolbar;
@@ -183,7 +182,7 @@ public class TweetDetailsActivity extends ActionBarActivity implements OnNewTwee
     Intent sharingIntent = new Intent(Intent.ACTION_SEND);
     sharingIntent.setType("text/html");
     sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, Html.fromHtml("<p>\"" + tweet.getText() + "\" from "
-            + tweet.getUser().getName() + "(@"+ tweet.getUser().getScreen_name() + ")"
+            + tweet.getUser().getName() + "(@" + tweet.getUser().getScreen_name() + ")"
             + "</p>"));
     startActivity(Intent.createChooser(sharingIntent, "Share a tweet"));
   }
@@ -262,7 +261,7 @@ public class TweetDetailsActivity extends ActionBarActivity implements OnNewTwee
 
       @Override
       public void failure(String error) {
-
+        Log.e(TAG, "-----------onReplyTweet failed : " + error);
       }
     });
   }

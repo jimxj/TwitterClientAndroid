@@ -13,7 +13,7 @@ import java.util.Locale;
 public class DateUtil {
   private static final String twitterFormat = "EEE MMM dd HH:mm:ss ZZZZZ yyyy";
   private static final SimpleDateFormat TWITTER_DATE_FORMATER = new SimpleDateFormat(twitterFormat, Locale.ENGLISH);
-  private static final SimpleDateFormat DETAIL_DATE_FORMATER = new SimpleDateFormat("HH:mm a dd MM yy", Locale.ENGLISH);
+  private static final SimpleDateFormat DETAIL_DATE_FORMATER = new SimpleDateFormat("HH:mm a dd MMM yy", Locale.ENGLISH);
 
   static {
     TWITTER_DATE_FORMATER.setLenient(true);
