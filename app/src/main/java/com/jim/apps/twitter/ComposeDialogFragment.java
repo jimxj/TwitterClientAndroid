@@ -101,9 +101,11 @@ public class ComposeDialogFragment extends DialogFragment {
     View view = inflater.inflate(R.layout.fragment_compose, container);
     final EditText etText = (EditText) view.findViewById(R.id.edText);
 
-    inReplyId = getArguments().getLong(KEY_IN_REPLY_ID);
-    if(null != inReplyId) {
-      etText.setText("@" + getArguments().getString(KEY_IN_REPLY_NAME));
+    if(null != getArguments()) {
+      inReplyId = getArguments().getLong(KEY_IN_REPLY_ID);
+      if (null != inReplyId) {
+        etText.setText("@" + getArguments().getString(KEY_IN_REPLY_NAME));
+      }
     }
 
     Button btnTweet = (Button) view.findViewById(R.id.btnTweet);

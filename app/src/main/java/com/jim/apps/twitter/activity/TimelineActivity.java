@@ -15,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
+import com.google.gson.reflect.TypeToken;
 import com.jim.apps.twitter.ComposeDialogFragment;
 import com.jim.apps.twitter.OnNewTweetListener;
 import com.jim.apps.twitter.R;
@@ -23,6 +24,8 @@ import com.jim.apps.twitter.TwitterApplication;
 import com.jim.apps.twitter.adapter.TweetAdapter;
 import com.jim.apps.twitter.api.ApiCallback;
 import com.jim.apps.twitter.api.TwitterClient;
+import com.jim.apps.twitter.caching.CacheMashaller;
+import com.jim.apps.twitter.caching.CachingDatabase;
 import com.jim.apps.twitter.connectivity.ConnectivityListener;
 import com.jim.apps.twitter.connectivity.ConnectivityManager;
 import com.jim.apps.twitter.models.Tweet;
@@ -43,6 +46,7 @@ import butterknife.InjectView;
 public class TimelineActivity extends ActionBarActivity
                               implements OnNewTweetListener {
   private static final String TAG = "TimelineActivity";
+  private static final String CACHE_NAME = "Tweets";
 
   private TweetAdapter tweetListAdapter;
 
@@ -75,6 +79,9 @@ public class TimelineActivity extends ActionBarActivity
 
   boolean needRefresh;
 
+  CacheMashaller cacheMashaller;
+  CachingDatabase cachingDatabase;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -83,21 +90,8 @@ public class TimelineActivity extends ActionBarActivity
     ButterKnife.inject(this);
     Fresco.initialize(this);
 
-    connectivityListener = new ConnectivityListener() {
-      @Override
-      public void onConnectivityStatusChanged(int lastKnowStatus, int newStatus) {
-        if(newStatus == ConnectivityManager.TYPE_NOT_CONNECTED) {
-          llNetworkStatus.setVisibility(View.VISIBLE);
-        } else {
-          llNetworkStatus.setVisibility(View.INVISIBLE);
-        }
-      }
-    };
-    ConnectivityManager.getInstance().registerListener(connectivityListener);
-
-    if(ConnectivityManager.TYPE_NOT_CONNECTED == ConnectivityManager.getInstance().getConnectivityStatus()) {
-      llNetworkStatus.setVisibility(View.VISIBLE);
-    }
+    cacheMashaller = new CacheMashaller();
+    cachingDatabase = new CachingDatabase(this);
 
     setupActionBar();
 
@@ -116,7 +110,24 @@ public class TimelineActivity extends ActionBarActivity
       }
     });
 
-    fetchTweets(true);
+    connectivityListener = new ConnectivityListener() {
+      @Override
+      public void onConnectivityStatusChanged(int lastKnowStatus, int newStatus) {
+        if(newStatus == ConnectivityManager.TYPE_NOT_CONNECTED) {
+          llNetworkStatus.setVisibility(View.VISIBLE);
+        } else {
+          llNetworkStatus.setVisibility(View.INVISIBLE);
+        }
+      }
+    };
+
+    if(isNetworkNotReachable()) {
+      llNetworkStatus.setVisibility(View.VISIBLE);
+
+      loadTweetsFromCache();
+    } else {
+      fetchTweets(true);
+    }
 
     // Setup refresh listener which triggers new data loading
     swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -168,14 +179,54 @@ public class TimelineActivity extends ActionBarActivity
     });
   }
 
-  @Override protected void onDestroy() {
-    super.onDestroy();
+  private boolean isNetworkNotReachable() {
+    return ConnectivityManager.TYPE_NOT_CONNECTED == ConnectivityManager.getInstance().getConnectivityStatus();
+  }
+
+  private void loadTweetsFromCache() {
+    String cachedBody = cachingDatabase.getCache(CACHE_NAME);
+    if(null != cachedBody) {
+      List<Tweet> cachedTweets = (List<Tweet>) cacheMashaller.fromCache(cachedBody, new TypeToken<List<Tweet>>() {}.getType());
+      tweetListAdapter.addAll(cachedTweets);
+    }
+  }
+
+  @Override protected void onResume() {
+    super.onResume();
+
+    ConnectivityManager.getInstance().registerListener(connectivityListener);
+  }
+
+  @Override protected void onStop() {
+    super.onStop();
+
+    if(tweetListAdapter.getCount() > 0) {
+      List<Tweet> tweetsToCache = new ArrayList<>(tweetListAdapter.getCount());
+      for (int i = 0; i < tweetListAdapter.getCount(); i++) {
+        tweetsToCache.add(tweetListAdapter.getItem(i));
+      }
+      cachingDatabase.addToCache(CACHE_NAME, cacheMashaller.toString(tweetsToCache));
+    }
 
     ConnectivityManager.getInstance().removeListener(connectivityListener);
   }
 
+  @Override protected void onDestroy() {
+    super.onDestroy();
+  }
+
   private void fetchTweets(final boolean isLoadingLatest) {
-    Log.d(TAG, "--------------fetchTweets, isLoadingLatest = " + isLoadingLatest + ", sinceId = " + sinceId + ", maxId = " + maxId);
+    Log.d(TAG, "--------------fetchTweets, isLoadingLatest = "
+        + isLoadingLatest
+        + ", sinceId = "
+        + sinceId
+        + ", maxId = "
+        + maxId);
+    if(isNetworkNotReachable()) {
+      Log.d(TAG, "--------------fetchTweets, Network not reachable.");
+      swipeContainer.setRefreshing(false);
+      return;
+    }
     twitterClient.getHomeTimeline(isLoadingLatest ? sinceId : null,
             !isLoadingLatest ? maxId : null, null, new ApiCallback<List<Tweet>>() {
               @Override
@@ -188,6 +239,7 @@ public class TimelineActivity extends ActionBarActivity
 
                 if (isLoadingLatest) {
                   if (1 == sinceId) {
+                    tweetListAdapter.clear();
                     tweetListAdapter.addAll(tweets);
                     if (null == maxId) {
                       maxId = tweets.get(tweets.size() - 1).getId();

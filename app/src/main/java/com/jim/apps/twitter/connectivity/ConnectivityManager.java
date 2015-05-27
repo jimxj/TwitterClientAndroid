@@ -3,11 +3,14 @@ package com.jim.apps.twitter.connectivity;
 import android.content.Context;
 import android.net.NetworkInfo;
 
+import android.util.Log;
 import java.lang.ref.WeakReference;
 import java.util.HashSet;
 import java.util.Set;
 
 public class ConnectivityManager {
+  private static final String TAG = "ConnectivityManager";
+
   public static int TYPE_UNKNOWN = -1;
   public static int TYPE_NOT_CONNECTED = 0;
   public static int TYPE_WIFI = 1;
@@ -28,9 +31,9 @@ public class ConnectivityManager {
 
   public static synchronized void initialize(Context applicationContext) {
     if(null != _instance) {
-      _instance = new ConnectivityManager(applicationContext);
-    }
 
+    }
+    Log.i(TAG, "--------initialize : " );
     _instance = new ConnectivityManager(applicationContext);
   }
 
@@ -55,7 +58,11 @@ public class ConnectivityManager {
       } else if(!activeNetwork.isConnectedOrConnecting()) {
         result = TYPE_NOT_CONNECTED;
       }
+    } else {
+      result = TYPE_NOT_CONNECTED;
     }
+
+    Log.i(TAG, "--------current status : " + result);
 
     if(lastKnownStatus != result) {
       notifyListeners(result);

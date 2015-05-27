@@ -75,17 +75,22 @@ public class TwitterClient extends OAuthBaseClient {
     getClient().get(apiUrl, params, new AsyncHttpResponseHandler() {
       @Override
       public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-        Type type = new TypeToken<List<Tweet>>() {
-        }.getType();
-        callback.success((List<Tweet>) gson.fromJson(new StringReader(new String(responseBody)), type));
-        Log.d(TAG, "-------------getHomeTimeline response : \n" + new String(responseBody));
+        Type type = new TypeToken<List<Tweet>>() {}.getType();
+        callback.success((List<Tweet>) gson.fromJson(new StringReader(
+            byteArrayToString(responseBody)), type));
+        Log.d(TAG, "-------------getHomeTimeline response : \n" + byteArrayToString(responseBody));
       }
 
       @Override
       public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-        callback.failure("Status code : " + statusCode + ", response body :\n" + new String(responseBody));
+        callback.failure("Status code : " + statusCode + ", response body :\n" + byteArrayToString(
+            responseBody));
       }
     });
+  }
+
+  private String byteArrayToString(byte[] responseBody) {
+    return null != responseBody ? new String(responseBody) : "";
   }
 
   public void newTweet(String text, Long inReplyToId, final ApiCallback<Tweet> callback) {
@@ -100,13 +105,14 @@ public class TwitterClient extends OAuthBaseClient {
     getClient().post(apiUrl, params, new AsyncHttpResponseHandler() {
       @Override
       public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-        callback.success(gson.fromJson(new StringReader(new String(responseBody)), Tweet.class));
-        Log.d(TAG, "-------------newTweet response : \n" + new String(responseBody));
+        callback.success(gson.fromJson(new StringReader(byteArrayToString(responseBody)), Tweet.class));
+        Log.d(TAG, "-------------newTweet response : \n" + byteArrayToString(responseBody));
       }
 
       @Override
       public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-        callback.failure("NewTweet Status code : " + statusCode + ", response body :\n" + new String(responseBody));
+        callback.failure("NewTweet Status code : " + statusCode + ", response body :\n" + byteArrayToString(
+            responseBody));
       }
     });
   }
@@ -117,13 +123,14 @@ public class TwitterClient extends OAuthBaseClient {
     getClient().post(apiUrl, null, new AsyncHttpResponseHandler() {
       @Override
       public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-        callback.success(gson.fromJson(new StringReader(new String(responseBody)), Tweet.class));
-        Log.d(TAG, "-------------reTweet response : \n" + new String(responseBody));
+        callback.success(gson.fromJson(new StringReader(byteArrayToString(responseBody)), Tweet.class));
+        Log.d(TAG, "-------------reTweet response : \n" + byteArrayToString(responseBody));
       }
 
       @Override
       public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-        callback.failure("reTweet Status code : " + statusCode + ", response body :\n" + new String(responseBody));
+        callback.failure("reTweet Status code : " + statusCode + ", response body :\n" + byteArrayToString(
+            responseBody));
       }
     });
   }
@@ -133,13 +140,14 @@ public class TwitterClient extends OAuthBaseClient {
     getClient().post(apiUrl, null, new AsyncHttpResponseHandler() {
       @Override
       public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-        callback.success(gson.fromJson(new StringReader(new String(responseBody)), Tweet.class));
-        Log.d(TAG, "-------------reTweet response : \n" + new String(responseBody));
+        callback.success(gson.fromJson(new StringReader(byteArrayToString(responseBody)), Tweet.class));
+        Log.d(TAG, "-------------reTweet response : \n" + byteArrayToString(responseBody));
       }
 
       @Override
       public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-        callback.failure("reTweet Status code : " + statusCode + ", response body :\n" + new String(responseBody));
+        callback.failure("reTweet Status code : " + statusCode + ", response body :\n" + byteArrayToString(
+            responseBody));
       }
     });
   }
@@ -153,13 +161,14 @@ public class TwitterClient extends OAuthBaseClient {
     getClient().post(apiUrl, params, new AsyncHttpResponseHandler() {
       @Override
       public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-        callback.success(gson.fromJson(new StringReader(new String(responseBody)), Tweet.class));
-        Log.d(TAG, "-------------favorite response : \n" + new String(responseBody));
+        callback.success(gson.fromJson(new StringReader(byteArrayToString(responseBody)), Tweet.class));
+        Log.d(TAG, "-------------favorite response : \n" + byteArrayToString(responseBody));
       }
 
       @Override
       public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-        callback.failure("favorite Status code : " + statusCode + ", response body :\n" + new String(responseBody));
+        callback.failure("favorite Status code : " + statusCode + ", response body :\n" + byteArrayToString(
+            responseBody));
       }
     });
   }
