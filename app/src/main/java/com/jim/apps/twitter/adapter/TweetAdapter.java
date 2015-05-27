@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -47,9 +48,9 @@ public class TweetAdapter extends ArrayAdapter<Tweet> {
     TextView retweetNum;
     TextView favorateNum;
     SimpleDraweeView postImage;
-    ImageView ivRetweet;
-    ImageView ivFavorate;
-    ImageView ivReply;
+    ImageButton ivRetweet;
+    ImageButton ivFavorate;
+    ImageButton ivReply;
     //TextView likes;
     //TextView commentNum;
   }
@@ -76,9 +77,9 @@ public class TweetAdapter extends ArrayAdapter<Tweet> {
       viewHolder.retweetNum = (TextView) convertView.findViewById(R.id.tvRetweetNum);
       viewHolder.favorateNum = (TextView) convertView.findViewById(R.id.tvFavorateNum);
       viewHolder.postImage = (SimpleDraweeView) convertView.findViewById(R.id.ivPhoto);
-      viewHolder.ivFavorate = (ImageView) convertView.findViewById(R.id.ivFavorate);
-      viewHolder.ivRetweet = (ImageView) convertView.findViewById(R.id.ivRetweet);
-      viewHolder.ivReply = (ImageView) convertView.findViewById(R.id.ivReply);
+      viewHolder.ivFavorate = (ImageButton) convertView.findViewById(R.id.ivFavorate);
+      viewHolder.ivRetweet = (ImageButton) convertView.findViewById(R.id.ivRetweet);
+      viewHolder.ivReply = (ImageButton) convertView.findViewById(R.id.ivReply);
       //viewHolder.postImage = (SimpleDraweeView) convertView.findViewById(R.id.ivPhoto);
       //viewHolder.likes = (TextView) convertView.findViewById(R.id.tvLikeNum);
       //viewHolder.commentNum = (TextView) convertView.findViewById(R.id.tvViewAllComments);

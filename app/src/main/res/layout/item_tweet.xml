@@ -123,11 +123,12 @@
                 android:layout_weight="1"
                 android:gravity="center_vertical"
                 >
-                <ImageView
+                <ImageButton
                     android:id="@+id/ivReply"
                     android:clickable="true"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
                     android:src="@drawable/reply"/>
             </LinearLayout>
 
@@ -137,17 +138,18 @@
                 android:layout_weight="1"
                 android:gravity="center_vertical"
                 >
-                <ImageView
+                <ImageButton
                     android:id="@+id/ivRetweet"
                     android:clickable="true"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
                     android:src="@drawable/retweet"/>
                 <TextView
                     android:id="@+id/tvRetweetNum"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="10dp"
+                    android:paddingLeft="5dp"
                     android:text="49"/>
             </LinearLayout>
 
@@ -157,17 +159,18 @@
                 android:layout_weight="1"
                 android:gravity="center_vertical"
                 >
-                <ImageView
+                <ImageButton
                     android:id="@+id/ivFavorate"
                     android:clickable="true"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
                     android:src="@drawable/favorite"/>
                 <TextView
                     android:id="@+id/tvFavorateNum"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="10dp"
+                    android:paddingLeft="5dp"
                     android:text="49"/>
             </LinearLayout>
 

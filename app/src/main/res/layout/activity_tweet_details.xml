@@ -170,37 +170,41 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp">
 
-                <ImageView
+                <ImageButton
                     android:id="@+id/ivReply"
                     android:clickable="true"
                     android:layout_weight="1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
                     android:src="@drawable/reply"/>
 
-                <ImageView
+                <ImageButton
                     android:id="@+id/ivRetweet"
                     android:clickable="true"
                     android:layout_weight="1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
                     android:src="@drawable/retweet"/>
 
 
-                <ImageView
+                <ImageButton
                     android:id="@+id/ivFavorate"
                     android:clickable="true"
                     android:layout_weight="1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
                     android:src="@drawable/favorite"/>
 
-                <ImageView
+                <ImageButton
                     android:id="@+id/ivShare"
                     android:clickable="true"
                     android:layout_weight="1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
                     android:src="@drawable/share"/>
             </LinearLayout>
 

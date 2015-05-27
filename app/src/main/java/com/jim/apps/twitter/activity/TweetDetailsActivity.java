@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -75,13 +76,13 @@ public class TweetDetailsActivity extends ActionBarActivity implements OnNewTwee
   TextView tvRetweetNum;
 
   @InjectView(R.id.ivRetweet)
-  ImageView ivRetweet;
+  ImageButton ivRetweet;
 
   @InjectView(R.id.ivFavorate)
-  ImageView ivFavorate;
+  ImageButton ivFavorate;
 
   @InjectView(R.id.ivShare)
-  ImageView ivShare;
+  ImageButton ivShare;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
