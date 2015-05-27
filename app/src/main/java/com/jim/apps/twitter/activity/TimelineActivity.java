@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.jim.apps.twitter.ComposeDialogFragment;
@@ -22,6 +23,8 @@ import com.jim.apps.twitter.TwitterApplication;
 import com.jim.apps.twitter.adapter.TweetAdapter;
 import com.jim.apps.twitter.api.ApiCallback;
 import com.jim.apps.twitter.api.TwitterClient;
+import com.jim.apps.twitter.connectivity.ConnectivityListener;
+import com.jim.apps.twitter.connectivity.ConnectivityManager;
 import com.jim.apps.twitter.models.Tweet;
 import com.jim.apps.twitter.customview.EndlessScrollListener;
 import com.melnykov.fab.FloatingActionButton;
@@ -55,6 +58,11 @@ public class TimelineActivity extends ActionBarActivity
   @InjectView(R.id.fab)
   FloatingActionButton fab;
 
+  @InjectView(R.id.llNetworkStatus)
+  LinearLayout llNetworkStatus;
+
+  ConnectivityListener connectivityListener;
+
   TwitterClient twitterClient;
 
   Long sinceId = 1l;
@@ -74,6 +82,22 @@ public class TimelineActivity extends ActionBarActivity
 
     ButterKnife.inject(this);
     Fresco.initialize(this);
+
+    connectivityListener = new ConnectivityListener() {
+      @Override
+      public void onConnectivityStatusChanged(int lastKnowStatus, int newStatus) {
+        if(newStatus == ConnectivityManager.TYPE_NOT_CONNECTED) {
+          llNetworkStatus.setVisibility(View.VISIBLE);
+        } else {
+          llNetworkStatus.setVisibility(View.INVISIBLE);
+        }
+      }
+    };
+    ConnectivityManager.getInstance().registerListener(connectivityListener);
+
+    if(ConnectivityManager.TYPE_NOT_CONNECTED == ConnectivityManager.getInstance().getConnectivityStatus()) {
+      llNetworkStatus.setVisibility(View.VISIBLE);
+    }
 
     setupActionBar();
 
@@ -142,6 +166,12 @@ public class TimelineActivity extends ActionBarActivity
         dialog.show(fm, "Compose a new tweet");
       }
     });
+  }
+
+  @Override protected void onDestroy() {
+    super.onDestroy();
+
+    ConnectivityManager.getInstance().removeListener(connectivityListener);
   }
 
   private void fetchTweets(final boolean isLoadingLatest) {

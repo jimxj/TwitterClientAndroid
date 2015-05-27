@@ -3,6 +3,7 @@ package com.jim.apps.twitter;
 import android.content.Context;
 
 import com.jim.apps.twitter.api.TwitterClient;
+import com.jim.apps.twitter.connectivity.ConnectivityManager;
 
 /*
  * This is the Android application itself and is used to configure various settings
@@ -20,6 +21,7 @@ public class TwitterApplication extends com.activeandroid.app.Application {
 	public void onCreate() {
 		super.onCreate();
 		TwitterApplication.context = this;
+		ConnectivityManager.initialize(getApplicationContext());
 	}
 
 	public static TwitterClient getTwitterClient() {
