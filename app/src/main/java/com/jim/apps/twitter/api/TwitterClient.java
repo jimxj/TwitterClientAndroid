@@ -60,9 +60,17 @@ public class TwitterClient extends OAuthBaseClient {
 	}
 
   public void getHomeTimeline(Long sinceId, Long maxId, Integer count, final ApiCallback<List<Tweet>> callback) {
-     //simpleTwitterApi.getHomeTimeline(sinceId, maxId, 20, callback);
-    String apiUrl = getApiUrl("statuses/home_timeline.json");
-    Log.d(TAG, "-------------getHomeTimeline, url = " + apiUrl + ", sinceId = " + sinceId + ", maxId = " + maxId);
+    getTimeline("home_timeline", sinceId, maxId, count, callback);
+  }
+
+  public void getMentionsTimeline(Long sinceId, Long maxId, Integer count, final ApiCallback<List<Tweet>> callback) {
+    getTimeline("mentions_timeline", sinceId, maxId, count, callback);
+  }
+
+  private void getTimeline(String timelineType, Long sinceId, Long maxId, Integer count, final ApiCallback<List<Tweet>> callback) {
+    //simpleTwitterApi.getTimeline(sinceId, maxId, 20, callback);
+    String apiUrl = getApiUrl("statuses/" + timelineType + ".json");
+    Log.d(TAG, "-------------getTimeline, url = " + apiUrl + ", sinceId = " + sinceId + ", maxId = " + maxId);
     RequestParams params = new RequestParams();
     params.put("count", 20);
     if (null != sinceId) {
@@ -78,7 +86,7 @@ public class TwitterClient extends OAuthBaseClient {
         Type type = new TypeToken<List<Tweet>>() {}.getType();
         callback.success((List<Tweet>) gson.fromJson(new StringReader(
             byteArrayToString(responseBody)), type));
-        Log.d(TAG, "-------------getHomeTimeline response : \n" + byteArrayToString(responseBody));
+        Log.d(TAG, "-------------getTimeline response : \n" + byteArrayToString(responseBody));
       }
 
       @Override
@@ -185,7 +193,7 @@ public class TwitterClient extends OAuthBaseClient {
 //	public interface SimpleTwitterApi {
 //
 //		@GET("/statuses/home_timeline.json")
-//		void getHomeTimeline(@Query("since_id") Long sinceId,
+//		void getTimeline(@Query("since_id") Long sinceId,
 //                         @Query("max_id") Long maxId,
 //                         @Query("count") Integer count,
 //                         Callback<List<Tweet>> callback);

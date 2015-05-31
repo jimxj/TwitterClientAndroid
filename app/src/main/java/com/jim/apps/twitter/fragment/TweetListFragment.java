@@ -66,6 +66,9 @@ public abstract class TweetListFragment extends Fragment {
 
   public abstract String getLogTag();
 
+  protected abstract void getTimeline(Long sinceId, Long maxId, Integer count,
+      final ApiCallback<List<Tweet>> callback);
+
   public boolean needCache() {
     return false;
   }
@@ -108,17 +111,6 @@ public abstract class TweetListFragment extends Fragment {
       }
     };
 
-    if(isNetworkNotReachable()) {
-      llNetworkStatus.setVisibility(View.VISIBLE);
-
-      if(needCache()) {
-        loadTweetsFromCache();
-      }
-    } else {
-      fetchTweets(true);
-    }
-
-
     // Setup refresh listener which triggers new data loading
     swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
       @Override
@@ -134,6 +126,17 @@ public abstract class TweetListFragment extends Fragment {
         android.R.color.holo_green_light,
         android.R.color.holo_orange_light,
         android.R.color.holo_red_light);
+
+    if(isNetworkNotReachable()) {
+      llNetworkStatus.setVisibility(View.VISIBLE);
+
+      if(needCache()) {
+        loadTweetsFromCache();
+      }
+    } else {
+      swipeContainer.setRefreshing(true);
+      fetchTweets(true);
+    }
 
     lvTimeline.setOnScrollListener(new EndlessScrollListener() {
 
@@ -198,7 +201,7 @@ public abstract class TweetListFragment extends Fragment {
       swipeContainer.setRefreshing(false);
       return;
     }
-    twitterClient.getHomeTimeline(isLoadingLatest ? sinceId : null,
+    getTimeline(isLoadingLatest ? sinceId : null,
         !isLoadingLatest ? maxId : null, null, new ApiCallback<List<Tweet>>() {
           @Override
           public void success(List<Tweet> tweets) {

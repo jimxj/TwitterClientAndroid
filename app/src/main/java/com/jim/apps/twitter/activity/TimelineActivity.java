@@ -2,8 +2,19 @@ package com.jim.apps.twitter.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -18,24 +29,29 @@ import com.jim.apps.twitter.TwitterApplication;
 import com.jim.apps.twitter.api.ApiCallback;
 import com.jim.apps.twitter.api.TwitterClient;
 import com.jim.apps.twitter.fragment.HomeTweetListFragment;
+import com.jim.apps.twitter.fragment.MentionsTweetListFragment;
 import com.jim.apps.twitter.fragment.TweetListFragment;
 import com.jim.apps.twitter.models.Tweet;
-import com.melnykov.fab.FloatingActionButton;
+import java.util.ArrayList;
+import java.util.List;
 //import retrofit.Callback;
 //import retrofit.RetrofitError;
 //import retrofit.client.Response;
 
-public class TimelineActivity extends ActionBarActivity
+public class TimelineActivity extends AppCompatActivity
                               implements OnNewTweetListener {
   private static final String TAG = "TimelineActivity";
 
-  @InjectView(R.id.tbMain)
+  @InjectView(R.id.toolbar)
   Toolbar toolbar;
 
-  @InjectView(R.id.fab)
-  FloatingActionButton fab;
+  @InjectView(R.id.fab) FloatingActionButton fab;
 
-  HomeTweetListFragment tweetListFragment;
+  @InjectView(R.id.drawer_layout)
+  DrawerLayout mDrawerLayout;
+
+  Adapter fragmentPagerAdapter;
+  ViewPager viewPager;
 
   protected TwitterClient twitterClient;
 
@@ -47,12 +63,13 @@ public class TimelineActivity extends ActionBarActivity
 
     ButterKnife.inject(this);
 
-    tweetListFragment =
-        (HomeTweetListFragment) getSupportFragmentManager().findFragmentById(R.id.fmTweetList);
-
     twitterClient = TwitterApplication.getTwitterClient();
 
-    setupActionBar();
+    setSupportActionBar(toolbar);
+
+    final ActionBar ab = getSupportActionBar();
+    ab.setHomeAsUpIndicator(R.drawable.ic_menu);
+    ab.setDisplayHomeAsUpEnabled(true);
 
     fab.setOnClickListener(new View.OnClickListener() {
       @Override
@@ -62,6 +79,38 @@ public class TimelineActivity extends ActionBarActivity
         dialog.show(fm, "Compose a new tweet");
       }
     });
+
+    NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+    if (navigationView != null) {
+      setupDrawerContent(navigationView);
+    }
+
+    viewPager = (ViewPager) findViewById(R.id.viewpager);
+    if (viewPager != null) {
+      setupViewPager(viewPager);
+    }
+
+    TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+    tabLayout.setupWithViewPager(viewPager);
+  }
+
+  private void setupViewPager(ViewPager viewPager) {
+    fragmentPagerAdapter = new Adapter(getSupportFragmentManager());
+    fragmentPagerAdapter.addFragment(new HomeTweetListFragment(), "Home");
+    fragmentPagerAdapter.addFragment(new MentionsTweetListFragment(), "@Mentions");
+    viewPager.setAdapter(fragmentPagerAdapter);
+  }
+
+  private void setupDrawerContent(NavigationView navigationView) {
+    navigationView.setNavigationItemSelectedListener(
+        new NavigationView.OnNavigationItemSelectedListener() {
+          @Override
+          public boolean onNavigationItemSelected(MenuItem menuItem) {
+            menuItem.setChecked(true);
+            mDrawerLayout.closeDrawers();
+            return true;
+          }
+        });
   }
 
   @Override
@@ -76,11 +125,13 @@ public class TimelineActivity extends ActionBarActivity
     // Handle action bar item clicks here. The action bar will
     // automatically handle clicks on the Home/Up button, so long
     // as you specify a parent activity in AndroidManifest.xml.
-    int id = item.getItemId();
+    switch (item.getItemId()) {
+      case android.R.id.home:
+        mDrawerLayout.openDrawer(GravityCompat.START);
+        return true;
 
-    //noinspection SimplifiableIfStatement
-    if (id == R.id.action_settings) {
-      return true;
+      case R.id.action_settings:
+        return true;
     }
 
     return super.onOptionsItemSelected(item);
@@ -94,15 +145,19 @@ public class TimelineActivity extends ActionBarActivity
         int index = data.getIntExtra("index", -1);
         Tweet updatedTweet = (Tweet) data.getSerializableExtra("tweet");
         if(index >= 0 && null != updatedTweet) {
-          tweetListFragment.update(index, updatedTweet);
+          getCurrentFragement().update(index, updatedTweet);
         }
       }
 
       if((status & TweetDetailsActivity.STATUS_ADDED) == TweetDetailsActivity.STATUS_ADDED) {
         //fetchTweets(true);
-        tweetListFragment.setNeedRefresh(true);
+        getCurrentFragement().setNeedRefresh(true);
       }
     }
+  }
+
+  private TweetListFragment getCurrentFragement() {
+    return ((TweetListFragment) fragmentPagerAdapter.getItem(viewPager.getCurrentItem()));
   }
 
   private void setupActionBar() {
@@ -144,10 +199,7 @@ public class TimelineActivity extends ActionBarActivity
 
   @Override
   public void onNewTweet(Tweet tweet) {
-    tweetListFragment.addLocalTweet(tweet);
-    //localNewTweets.add(tweet);
-    //tweetListAdapter.insert(tweet, 0);
-    //tweetListAdapter.notifyDataSetChanged();
+    getCurrentFragement().addLocalTweet(tweet);
   }
 
   @Override
@@ -164,6 +216,35 @@ public class TimelineActivity extends ActionBarActivity
 
       }
     });
+  }
+
+  static class Adapter extends FragmentPagerAdapter {
+    private final List<Fragment> mFragments = new ArrayList<>();
+    private final List<String> mFragmentTitles = new ArrayList<>();
+
+    public Adapter(FragmentManager fm) {
+      super(fm);
+    }
+
+    public void addFragment(Fragment fragment, String title) {
+      mFragments.add(fragment);
+      mFragmentTitles.add(title);
+    }
+
+    @Override
+    public Fragment getItem(int position) {
+      return mFragments.get(position);
+    }
+
+    @Override
+    public int getCount() {
+      return mFragments.size();
+    }
+
+    @Override
+    public CharSequence getPageTitle(int position) {
+      return mFragmentTitles.get(position);
+    }
   }
 
 }
