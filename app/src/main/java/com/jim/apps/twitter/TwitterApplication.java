@@ -2,6 +2,7 @@ package com.jim.apps.twitter;
 
 import android.content.Context;
 
+import com.facebook.drawee.backends.pipeline.Fresco;
 import com.jim.apps.twitter.api.TwitterClient;
 import com.jim.apps.twitter.connectivity.ConnectivityManager;
 
@@ -22,6 +23,7 @@ public class TwitterApplication extends com.activeandroid.app.Application {
 		super.onCreate();
 		TwitterApplication.context = this;
 		ConnectivityManager.initialize(getApplicationContext());
+		Fresco.initialize(this);
 	}
 
 	public static TwitterClient getTwitterClient() {

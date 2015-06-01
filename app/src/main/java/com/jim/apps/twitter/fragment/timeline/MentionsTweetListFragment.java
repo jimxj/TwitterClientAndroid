@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2012-2015 Magnet Systems. All rights reserved.
  */
-package com.jim.apps.twitter.fragment;
+package com.jim.apps.twitter.fragment.timeline;
 
 import com.jim.apps.twitter.api.ApiCallback;
 import com.jim.apps.twitter.models.Tweet;
 import java.util.List;
 
-public class MentionsTweetListFragment extends TweetListFragment {
+public class MentionsTweetListFragment extends AbstractTweetListFragment {
   private static final String TAG = "MentionsTweetListFragment";
 
   @Override public String getLogTag() {

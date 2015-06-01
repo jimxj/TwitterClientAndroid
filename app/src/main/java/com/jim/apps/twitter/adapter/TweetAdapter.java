@@ -4,6 +4,7 @@
 package com.jim.apps.twitter.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
@@ -20,6 +21,7 @@ import com.jim.apps.twitter.OnNewTweetListener;
 import com.jim.apps.twitter.R;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.jim.apps.twitter.TwitterApplication;
+import com.jim.apps.twitter.activity.UserProfileActivity;
 import com.jim.apps.twitter.util.DateUtil;
 import com.jim.apps.twitter.activity.TimelineActivity;
 import com.jim.apps.twitter.api.ApiCallback;
@@ -88,6 +90,14 @@ public class TweetAdapter extends ArrayAdapter<Tweet> {
     }
 
     viewHolder.authorImage.setImageURI(Uri.parse(tweet.getUser().getProfile_image_url()));
+    viewHolder.authorImage.setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View v) {
+        Intent i = new Intent(getContext(), UserProfileActivity.class);
+        // TODO : user parceable instead
+        i.putExtra("user", tweet.getUser());
+        getContext().startActivity(i);
+      }
+    });
 
     //viewHolder.postImage.setImageURI(Uri.parse(photo.getImages().getStandard_resolution().getUrl()));
 

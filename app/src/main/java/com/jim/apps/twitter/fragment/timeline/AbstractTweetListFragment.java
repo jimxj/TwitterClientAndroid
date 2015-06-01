@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2012-2015 Magnet Systems. All rights reserved.
  */
-package com.jim.apps.twitter.fragment;
+package com.jim.apps.twitter.fragment.timeline;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -37,7 +37,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public abstract class TweetListFragment extends Fragment {
+public abstract class AbstractTweetListFragment extends Fragment {
 
   @InjectView(R.id.lvTimeline) ListView lvTimeline;
 
@@ -54,7 +54,6 @@ public abstract class TweetListFragment extends Fragment {
 
   @InjectView(R.id.llNetworkStatus) LinearLayout llNetworkStatus;
 
-
   protected CacheMashaller cacheMashaller;
   protected CachingDatabase cachingDatabase;
 
@@ -63,6 +62,8 @@ public abstract class TweetListFragment extends Fragment {
   // Save tweets created by retweet or reply locally, only add them to
   // adapter when the listview is scrolled
   List<Tweet> localNewTweets = new ArrayList<>();
+
+  protected String screenName;
 
   public abstract String getLogTag();
 
@@ -73,12 +74,16 @@ public abstract class TweetListFragment extends Fragment {
     return false;
   }
 
+  public void setScreenName(String screenName) {
+    this.screenName = screenName;
+  }
+
   @Nullable @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
       Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_tweet_list, container, false);
 
     ButterKnife.inject(this, view);
-    Fresco.initialize(getActivity());
+    //Fresco.initialize(getActivity());
 
     if(needCache()) {
       cacheMashaller = new CacheMashaller();
@@ -201,10 +206,9 @@ public abstract class TweetListFragment extends Fragment {
       swipeContainer.setRefreshing(false);
       return;
     }
-    getTimeline(isLoadingLatest ? sinceId : null,
-        !isLoadingLatest ? maxId : null, null, new ApiCallback<List<Tweet>>() {
-          @Override
-          public void success(List<Tweet> tweets) {
+    getTimeline(isLoadingLatest ? sinceId : null, !isLoadingLatest ? maxId : null, null,
+        new ApiCallback<List<Tweet>>() {
+          @Override public void success(List<Tweet> tweets) {
             Log.d(getLogTag(), "fetched " + tweets.size() + " new tweets : " + tweets);
             if (0 == tweets.size()) {
               swipeContainer.setRefreshing(false);
@@ -233,8 +237,7 @@ public abstract class TweetListFragment extends Fragment {
             swipeContainer.setRefreshing(false);
           }
 
-          @Override
-          public void failure(String error) {
+          @Override public void failure(String error) {
             Log.e(getLogTag(), "Failed to fetch tweets : " + error);
 
             swipeContainer.setRefreshing(false);
@@ -251,12 +254,14 @@ public abstract class TweetListFragment extends Fragment {
   @Override public void onStop() {
     super.onStop();
 
-    if(tweetListAdapter.getCount() > 0) {
-      List<Tweet> tweetsToCache = new ArrayList<>(tweetListAdapter.getCount());
-      for (int i = 0; i < tweetListAdapter.getCount(); i++) {
-        tweetsToCache.add(tweetListAdapter.getItem(i));
+    if(needCache()) {
+      if (tweetListAdapter.getCount() > 0) {
+        List<Tweet> tweetsToCache = new ArrayList<>(tweetListAdapter.getCount());
+        for (int i = 0; i < tweetListAdapter.getCount(); i++) {
+          tweetsToCache.add(tweetListAdapter.getItem(i));
+        }
+        cachingDatabase.addToCache(getLogTag(), cacheMashaller.toString(tweetsToCache));
       }
-      cachingDatabase.addToCache(getLogTag(), cacheMashaller.toString(tweetsToCache));
     }
 
     ConnectivityManager.getInstance().removeListener(connectivityListener);

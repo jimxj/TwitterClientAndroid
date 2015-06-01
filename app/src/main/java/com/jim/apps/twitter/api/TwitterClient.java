@@ -60,14 +60,18 @@ public class TwitterClient extends OAuthBaseClient {
 	}
 
   public void getHomeTimeline(Long sinceId, Long maxId, Integer count, final ApiCallback<List<Tweet>> callback) {
-    getTimeline("home_timeline", sinceId, maxId, count, callback);
+    getTimeline("home_timeline", sinceId, maxId, count, null, callback);
   }
 
   public void getMentionsTimeline(Long sinceId, Long maxId, Integer count, final ApiCallback<List<Tweet>> callback) {
-    getTimeline("mentions_timeline", sinceId, maxId, count, callback);
+    getTimeline("mentions_timeline", sinceId, maxId, count, null, callback);
   }
 
-  private void getTimeline(String timelineType, Long sinceId, Long maxId, Integer count, final ApiCallback<List<Tweet>> callback) {
+  public void getUserTimeline(String screenName, Long sinceId, Long maxId, Integer count, final ApiCallback<List<Tweet>> callback) {
+    getTimeline("user_timeline", sinceId, maxId, count, screenName, callback);
+  }
+
+  private void getTimeline(String timelineType, Long sinceId, Long maxId, Integer count, String screenName, final ApiCallback<List<Tweet>> callback) {
     //simpleTwitterApi.getTimeline(sinceId, maxId, 20, callback);
     String apiUrl = getApiUrl("statuses/" + timelineType + ".json");
     Log.d(TAG, "-------------getTimeline, url = " + apiUrl + ", sinceId = " + sinceId + ", maxId = " + maxId);
@@ -78,6 +82,9 @@ public class TwitterClient extends OAuthBaseClient {
     }
     if (null != maxId) {
       params.put("max_id", maxId  );
+    }
+    if (null != screenName) {
+      params.put("screen_name", screenName  );
     }
     params.put("include_entities", true);
     getClient().get(apiUrl, params, new AsyncHttpResponseHandler() {

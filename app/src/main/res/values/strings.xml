@@ -10,5 +10,6 @@
     <string name="btnTweet">Tweet</string>
     <string name="cancel">Cancel</string>
     <string name="title_activity_tweet_details">TweetDetailsActivity</string>
+  <string name="title_activity_user_profile">UserProfileActivity</string>
 
 </resources>
