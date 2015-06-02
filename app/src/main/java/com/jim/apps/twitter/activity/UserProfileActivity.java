@@ -1,5 +1,6 @@
 package com.jim.apps.twitter.activity;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.support.design.widget.AppBarLayout;
@@ -10,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -40,6 +42,8 @@ public class UserProfileActivity extends AppCompatActivity implements OnNewTweet
 
     ButterKnife.inject(this);
 
+    setupActionBar();
+
     User user = (User) getIntent().getSerializableExtra("user");
     //if (savedInstanceState == null) {
     //  ProfileHeaderFragment headerFragment =
@@ -49,7 +53,7 @@ public class UserProfileActivity extends AppCompatActivity implements OnNewTweet
     tvUsername.setText(user.getName());
     tvScreenName.setText("@" + user.getScreen_name());
     ivProfileImage.setImageURI(Uri.parse(user.getProfile_image_url()));
-    if(null != user.getProfile_background_image_url()) {
+    if(user.getProfile_use_background_image() && null != user.getProfile_background_image_url()) {
       SimpleDraweeView draweeView = new SimpleDraweeView(this);
       draweeView.setScaleType(ImageView.ScaleType.FIT_XY);
       draweeView.setImageURI(Uri.parse(user.getProfile_background_image_url()));
@@ -94,6 +98,19 @@ public class UserProfileActivity extends AppCompatActivity implements OnNewTweet
 
     return super.onOptionsItemSelected(item);
   }
+
+  private void setupActionBar() {
+    toolbar.setNavigationIcon(R.drawable.back_arrow);
+    toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        finish();
+      }
+    });
+
+    toolbar.setLogo(R.drawable.twitter_bird);
+  }
+
 
   @Override public void onNewTweet(String text) {
 
