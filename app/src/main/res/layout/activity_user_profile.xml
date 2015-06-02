@@ -46,36 +46,94 @@
       android:id="@+id/ivProfile"
       fresco:placeholderImage="@drawable/default_profile_image"/>
 
+    <LinearLayout
+        android:id="@+id/llUserNames"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_alignLeft="@+id/ivProfile"
+        android:layout_below="@+id/ivProfile"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="jimliu"
+            android:id="@+id/tvUserName"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:maxLength="40"/>
 
-  <TextView
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:textAppearance="?android:attr/textAppearanceMedium"
-      android:text="jimliu"
-      android:id="@+id/tvUserName"
-      android:layout_marginBottom="@dimen/activity_vertical_margin"
-      android:layout_below="@+id/ivProfile"
-      android:layout_alignLeft="@+id/ivProfile"
-      android:textColor="@color/black"
-      android:textStyle="bold"
-      android:maxLength="40"/>
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:textAppearance="?android:attr/textAppearanceSmall"
+          android:text="jimliu"
+          android:id="@+id/tvScreenName"
+          android:layout_marginLeft="5dp"
+          android:maxLength="40"/>
 
-  <TextView
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:textAppearance="?android:attr/textAppearanceSmall"
-      android:paddingLeft="5dp"
-      android:text="jimliu"
-      android:id="@+id/tvScreenName"
-      android:layout_alignLeft="@+id/ivProfile"
-      android:layout_marginBottom="@dimen/activity_vertical_margin"
-      android:layout_below="@+id/tvUserName"
-      android:layout_centerVertical="true"
-      android:maxLength="40"/>
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:paddingLeft="5dp"
+        android:text="jimliu"
+        android:id="@+id/tvIntroduction"
+        android:layout_below="@+id/llUserNames"
+        android:layout_marginLeft="5dp"
+        android:maxLines="3"/>
+
+    <LinearLayout
+        android:id="@+id/llFollow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_alignLeft="@+id/ivProfile"
+        android:layout_below="@+id/tvIntroduction"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp">
+
+        <TextView
+            android:id="@+id/tvFollowingNum"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:text="49"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/silver"
+            android:paddingLeft="5dp"
+            android:text="FOLLOWING"/>
+
+        <TextView
+            android:id="@+id/tvFollowerNum"
+            android:textColor="@color/black"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="20dp"
+            android:text="49"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/silver"
+            android:paddingLeft="5dp"
+            android:text="FOLLOWERS"/>
+
+    </LinearLayout>
 
   <View
       android:id="@+id/vLine"
-      android:layout_below="@+id/tvScreenName"
+      android:layout_below="@+id/llFollow"
       android:layout_width="match_parent"
       android:layout_height="1dp"
       android:background="@color/primary_blue"

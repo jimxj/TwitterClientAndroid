@@ -38,6 +38,9 @@ public class UserProfileActivity extends AppCompatActivity implements OnNewTweet
   @InjectView(R.id.ivProfile) SimpleDraweeView ivProfileImage;
   @InjectView(R.id.tvUserName) TextView tvUsername;
   @InjectView(R.id.tvScreenName) TextView tvScreenName;
+  @InjectView(R.id.tvFollowingNum) TextView tvFollowingNum;
+  @InjectView(R.id.tvFollowerNum) TextView tvFollowerNum;
+  @InjectView(R.id.tvIntroduction) TextView tvIntroduction;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -72,6 +75,9 @@ public class UserProfileActivity extends AppCompatActivity implements OnNewTweet
     tvUsername.setText(user.getName());
     tvScreenName.setText("@" + user.getScreen_name());
     ivProfileImage.setImageURI(Uri.parse(user.getProfile_image_url()));
+    tvFollowingNum.setText(String.valueOf(user.getFriends_count()));
+    tvFollowerNum.setText(String.valueOf(user.getFollowers_count()));
+    tvIntroduction.setText(user.getDescription());
     if(user.getProfile_use_background_image() && null != user.getProfile_background_image_url()) {
       SimpleDraweeView draweeView = new SimpleDraweeView(this);
       draweeView.setScaleType(ImageView.ScaleType.FIT_XY);
