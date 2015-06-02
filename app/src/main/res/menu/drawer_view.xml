@@ -22,7 +22,7 @@
             android:icon="@drawable/twitter_bird"
             android:title="Home" />
         <item
-            android:id="@+id/nav_messages"
+            android:id="@+id/nav_profile"
             android:icon="@drawable/default_profile_image"
             android:title="User Profile" />
     </group>

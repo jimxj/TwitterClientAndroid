@@ -21,11 +21,14 @@ import butterknife.InjectView;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.jim.apps.twitter.OnNewTweetListener;
 import com.jim.apps.twitter.R;
+import com.jim.apps.twitter.TwitterApplication;
+import com.jim.apps.twitter.api.ApiCallback;
 import com.jim.apps.twitter.fragment.ProfileHeaderFragment;
 import com.jim.apps.twitter.fragment.timeline.UserTweetListFragment;
 import com.jim.apps.twitter.models.Tweet;
 import com.jim.apps.twitter.models.User;
 import com.jim.apps.twitter.util.CommonUtil;
+import java.io.Serializable;
 
 public class UserProfileActivity extends AppCompatActivity implements OnNewTweetListener {
 
@@ -44,12 +47,28 @@ public class UserProfileActivity extends AppCompatActivity implements OnNewTweet
 
     setupActionBar();
 
-    User user = (User) getIntent().getSerializableExtra("user");
+    Serializable serializable = getIntent().getSerializableExtra("user");
+    if(null != serializable) {
+      setUserData((User) serializable);
+    } else {
+      TwitterApplication.getTwitterClient().verifyCredential(new ApiCallback<User>() {
+        @Override public void success(User user) {
+          setUserData(user);
+        }
+
+        @Override public void failure(String error) {
+
+        }
+      });
+    }
     //if (savedInstanceState == null) {
     //  ProfileHeaderFragment headerFragment =
     //      (ProfileHeaderFragment) getSupportFragmentManager().findFragmentById(R.id.fmProfileHeader);
     //  headerFragment.setUser(user);
     //}
+  }
+
+  private void setUserData(User user) {
     tvUsername.setText(user.getName());
     tvScreenName.setText("@" + user.getScreen_name());
     ivProfileImage.setImageURI(Uri.parse(user.getProfile_image_url()));

@@ -1,5 +1,6 @@
 package com.jim.apps.twitter.api;
 
+import com.jim.apps.twitter.models.User;
 import org.apache.http.Header;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.TwitterApi;
@@ -145,6 +146,23 @@ public class TwitterClient extends OAuthBaseClient {
       @Override
       public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
         callback.failure("reTweet Status code : " + statusCode + ", response body :\n" + byteArrayToString(
+            responseBody));
+      }
+    });
+  }
+
+  public void verifyCredential(final ApiCallback<User> callback) {
+    String apiUrl = getApiUrl("account/verify_credentials.json");
+    Log.d(TAG, "-------------verifyCredential, url = " + apiUrl);
+    getClient().get(apiUrl, null, new AsyncHttpResponseHandler() {
+      @Override public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+        callback.success(gson.fromJson(new StringReader(byteArrayToString(responseBody)), User.class));
+        Log.d(TAG, "-------------reTweet response : \n" + byteArrayToString(responseBody));
+      }
+
+      @Override public void onFailure(int statusCode, Header[] headers, byte[] responseBody,
+          Throwable error) {
+        callback.failure("verifyCredential Status code : " + statusCode + ", response body :\n" + byteArrayToString(
             responseBody));
       }
     });

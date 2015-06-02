@@ -40,13 +40,11 @@ public class TimelineActivity extends AppCompatActivity
                               implements OnNewTweetListener {
   private static final String TAG = "TimelineActivity";
 
-  @InjectView(R.id.toolbar)
-  Toolbar toolbar;
+  @InjectView(R.id.toolbar) Toolbar toolbar;
 
   @InjectView(R.id.fab) FloatingActionButton fab;
 
-  @InjectView(R.id.drawer_layout)
-  DrawerLayout mDrawerLayout;
+  @InjectView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
 
   Adapter fragmentPagerAdapter;
   ViewPager viewPager;
@@ -105,6 +103,14 @@ public class TimelineActivity extends AppCompatActivity
           @Override
           public boolean onNavigationItemSelected(MenuItem menuItem) {
             menuItem.setChecked(true);
+
+            if(menuItem.getItemId() == R.id.nav_profile) {
+              Intent i = new Intent(TimelineActivity.this, UserProfileActivity.class);
+              // TODO : user parceable instead
+              //i.putExtra("user", tweet.getUser());
+              TimelineActivity.this.startActivity(i);
+            }
+
             mDrawerLayout.closeDrawers();
             return true;
           }
