@@ -84,6 +84,7 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:paddingLeft="5dp"
         android:text="jimliu"
+        android:textColor="@color/black"
         android:id="@+id/tvIntroduction"
         android:layout_below="@+id/llUserNames"
         android:layout_marginLeft="5dp"
