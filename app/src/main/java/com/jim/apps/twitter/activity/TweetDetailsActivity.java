@@ -128,6 +128,18 @@ public class TweetDetailsActivity extends ActionBarActivity implements OnNewTwee
     }
   }
 
+  @OnClick(R.id.ivDetailProfileImage)
+  public void onUserProfileImageClick() {
+    ivProfileImage.setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View v) {
+        Intent i = new Intent(TweetDetailsActivity.this, UserProfileActivity.class);
+        // TODO : user parceable instead
+        i.putExtra("user", tweet.getUser());
+        TweetDetailsActivity.this.startActivity(i);
+      }
+    });
+  }
+
   @OnClick(R.id.ivRetweet)
   public void onRetweetClick() {
     Log.d(TAG, "-----------ivRetweet.onClick : " + tweet.getText());
