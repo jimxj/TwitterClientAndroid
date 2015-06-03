@@ -8,7 +8,40 @@ Time spent: 20 hours spent in total
 
 ## User Stories
 
-The following **required** functionality is completed:
+### Phase II
+* [X] User can **switch between Timeline and Mention views using tabs**
+  * [X] User can view their home timeline tweets.
+  * [X] User can view the recent mentions of their username.
+* [X] User can navigate to **view their own profile**
+  * [X] User can see picture, tagline, # of followers, # of following, and tweets on their profile.
+* [X] User can **click on the profile image** in any tweet to see **another user's** profile.
+ * [X] User can see picture, tagline, # of followers, # of following, and tweets of clicked user.
+ * [X] Profile view includes that user's timeline
+* [X] User can [infinitely paginate](http://guides.codepath.com/android/Endless-Scrolling-with-AdapterViews) any of these timelines (home, mentions, user) by scrolling to the bottom
+
+* [ ] User can view following / followers list through the profile
+* [X] Implements robust error handling, [check if internet is available](http://guides.codepath.com/android/Sending-and-Managing-Network-Requests#checking-for-network-connectivity), handle error cases, network failures
+* [ ] When a network request is sent, user sees an [indeterminate progress indicator](http://guides.codepath.com/android/Handling-ProgressBars#progress-within-actionbar)
+* [X] User can **"reply" to any tweet on their home timeline**
+  * [X] The user that wrote the original tweet is automatically "@" replied in compose
+* [X] User can click on a tweet to be **taken to a "detail view"** of that tweet
+ * [X] User can take favorite (and unfavorite) or retweet actions on a tweet
+* [ ] Improve the user interface and theme the app to feel twitter branded
+* [ ] User can **search for tweets matching a particular query** and see results
+
+The following **bonus** features are implemented:
+
+* [ ] User can view their direct messages (or send new ones)
+
+#### Video Walkthrough 
+
+Here's a walkthrough of implemented user stories:
+
+<img src='demo.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+
+GIF created with [LiceCap](http://www.cockos.com/licecap/).
+
+### Phase I
 
 * [X]	User can **sign in to Twitter** using OAuth login
 * [X]	User can **view tweets from their home timeline**
